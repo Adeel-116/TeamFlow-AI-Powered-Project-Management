@@ -37,20 +37,15 @@ import {
     User
 } from 'lucide-react';
 import TeamflowLogo from "../../../public/teamflow.png"
+import {dummyProjects, navigation, stats, recentTasks} from "../../data/Data"
 
-type SectionKey = 'dashboards' | 'projects' | 'tasks' | 'team' | 'files' | 'calendar' | 'reports';
+// type SectionKey = 'dashboards' | 'projects' | 'tasks' | 'team' | 'files' | 'calendar' | 'reports';
 
 const Home1 = () => {
-    const [activePage, setActivePage] = useState('personal-dashboard');
-    const [expandedSections, setExpandedSections] = useState<Record<SectionKey, boolean>>({
-        dashboards: true,
-        projects: false,
-        tasks: false,
-        team: false,
-        files: false,
-        calendar: false,
-        reports: false
-    });
+   
+    const [activePage, setActivePage] = useState("dashboard")
+
+    const [expandedSections, setExpandedSections] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const [currentUser] = useState({
@@ -61,16 +56,16 @@ const Home1 = () => {
         initials: 'JD'
     });
 
-    const toggleSection = (section: SectionKey) => {
-        setExpandedSections((prev) => ({
-            ...prev,
-            [section]: !prev[section],
-        }));
-    };
+    // const toggleSection = (section: SectionKey) => {
+    //     setExpandedSections((prev) => ({
+    //         ...prev,
+    //         [section]: !prev[section],
+    //     }));
+    // };
 
     const navigation = [
         {
-            id: 'dashboards',
+            id: 'dashboard',
             icon: Home,
             label: 'Dashboards',
             items: [
@@ -146,27 +141,7 @@ const Home1 = () => {
         }
     ];
 
-    const dummyProjects = [
-        { id: 1, name: 'Website Redesign', progress: 75, status: 'In Progress', dueDate: 'Oct 20, 2025' },
-        { id: 2, name: 'Mobile App Launch', progress: 45, status: 'In Progress', dueDate: 'Nov 5, 2025' },
-        { id: 3, name: 'Marketing Campaign', progress: 90, status: 'Review', dueDate: 'Oct 15, 2025' },
-        { id: 4, name: 'Client Onboarding', progress: 30, status: 'Planning', dueDate: 'Oct 25, 2025' }
-    ];
-
-    const recentTasks = [
-        { id: 1, title: 'Design homepage mockup', project: 'Website Redesign', priority: 'High', status: 'In Progress' },
-        { id: 2, title: 'Review API documentation', project: 'Mobile App Launch', priority: 'Medium', status: 'Todo' },
-        { id: 3, title: 'Prepare presentation slides', project: 'Marketing Campaign', priority: 'High', status: 'Done' },
-        { id: 4, title: 'Update project timeline', project: 'Client Onboarding', priority: 'Low', status: 'In Progress' }
-    ];
-
-    const stats = [
-        { label: 'Active Projects', value: '12', icon: Target, change: '+2 this month', trend: 'up' },
-        { label: 'Tasks Completed', value: '48', icon: CheckSquare, change: '+15 this week', trend: 'up' },
-        { label: 'Team Members', value: '24', icon: Users, change: '+3 new', trend: 'up' },
-        { label: 'Hours Tracked', value: '156', icon: Clock, change: '32h this week', trend: 'neutral' }
-    ];
-
+ 
     return (
         <div className="flex h-screen bg-gray-50">
             {/* Sidebar */}
@@ -174,7 +149,7 @@ const Home1 = () => {
                 {/* Logo Section */}
                 <div className="px-5 py-5.5 border-b border-gray-200">
                     <div className="flex items-center gap-1">
-                        <div className=" bg-red-400 flex ">
+                        <div className=" flex ">
                             <Image
                                 src= {TeamflowLogo}   
                                 alt="TeamFlow AI Logo"
@@ -196,20 +171,20 @@ const Home1 = () => {
                         {navigation.map((section) => (
                             <div key={section.id} className="mb-2">
                                 <button
-                                    onClick={() => toggleSection(section.id)}
+                                    onClick={() => ""}
                                     className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
                                 >
                                     <div className="flex items-center gap-3">
                                         <section.icon className="w-5 h-5" />
                                         <span>{section.label}</span>
                                     </div>
-                                    {expandedSections[section.id] ?
+                                {expandedSections ?
                                         <ChevronDown className="w-4 h-4" /> :
                                         <ChevronRight className="w-4 h-4" />
-                                    }
+                                    } 
                                 </button>
 
-                                {expandedSections[section.id] && (
+                                 {expandedSections && (
                                     <div className="ml-8 mt-1 space-y-1">
                                         {section.items.map((item) => (
                                             <button
@@ -224,7 +199,7 @@ const Home1 = () => {
                                             </button>
                                         ))}
                                     </div>
-                                )}
+                                )} 
                             </div>
                         ))}
                     </nav>
@@ -262,7 +237,7 @@ const Home1 = () => {
                             </Button>
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-                                <p className="text-sm text-gray-500">Welcome back! Here's what's happening today.</p>
+                                <p className="text-sm text-gray-500 lg:flex hidden">Welcome back! Here's what's happening today.</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
