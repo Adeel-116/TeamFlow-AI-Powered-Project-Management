@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import Image from 'next/image';
 import {
     DropdownMenu,
@@ -16,12 +15,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-    Home,
     FolderOpen,
     CheckSquare,
     Users,
-    FileText,
-    Calendar,
     BarChart3,
     Settings,
     HelpCircle,
@@ -30,23 +26,18 @@ import {
     ChevronRight,
     Menu,
     X,
-    Clock,
-    Target,
     TrendingUp,
     Bell,
     User
 } from 'lucide-react';
 import TeamflowLogo from "../../../public/teamflow.png"
-import {dummyProjects, navigation, stats, recentTasks} from "../../data/Data"
+import { dummyProjects, stats, recentTasks, navigation} from "../../data/Data"
 
-// type SectionKey = 'dashboards' | 'projects' | 'tasks' | 'team' | 'files' | 'calendar' | 'reports';
+const Home = () => {
 
-const Home1 = () => {
-   
     const [activePage, setActivePage] = useState("dashboard")
-
-    const [expandedSections, setExpandedSections] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
     const [currentUser] = useState({
         name: 'John Doe',
@@ -56,92 +47,26 @@ const Home1 = () => {
         initials: 'JD'
     });
 
-    // const toggleSection = (section: SectionKey) => {
-    //     setExpandedSections((prev) => ({
-    //         ...prev,
-    //         [section]: !prev[section],
-    //     }));
-    // };
-
-    const navigation = [
-        {
-            id: 'dashboard',
-            icon: Home,
-            label: 'Dashboards',
-            items: [
-                { id: 'personal-dashboard', label: 'Personal Dashboard' },
-                { id: 'project-dashboard', label: 'Project Dashboard' },
-                { id: 'agency-dashboard', label: 'Agency Dashboard' }
-            ]
-        },
-        {
-            id: 'projects',
-            icon: FolderOpen,
-            label: 'Project Management',
-            items: [
-                { id: 'all-projects', label: 'All Projects' },
-                { id: 'create-project', label: 'Create Project' },
-                { id: 'milestones', label: 'Milestones' },
-                { id: 'task-overview', label: 'Task Overview' },
-                { id: 'timeline-view', label: 'Timeline View (Gantt)' }
-            ]
-        },
-        {
-            id: 'tasks',
-            icon: CheckSquare,
-            label: 'Task Management',
-            items: [
-                { id: 'my-tasks', label: 'My Tasks' },
-                { id: 'subtasks', label: 'Subtasks' },
-                { id: 'time-tracking', label: 'Time Tracking' },
-                { id: 'labels-tags', label: 'Labels / Tags' }
-            ]
-        },
-        {
-            id: 'team',
-            icon: Users,
-            label: 'Team Collaboration',
-            items: [
-                { id: 'messages', label: 'Messages / Chat' },
-                { id: 'activity-feed', label: 'Activity Feed' },
-                { id: 'notifications', label: 'Notifications' }
-            ]
-        },
-        {
-            id: 'files',
-            icon: FileText,
-            label: 'File Management',
-            items: [
-                { id: 'documents', label: 'Documents' },
-                { id: 'uploads', label: 'Uploads' },
-                { id: 'version-control', label: 'Version Control' },
-                { id: 'file-search', label: 'File Search' }
-            ]
-        },
-        {
-            id: 'calendar',
-            icon: Calendar,
-            label: 'Calendar & Scheduling',
-            items: [
-                { id: 'calendar-view', label: 'Calendar View' },
-                { id: 'meetings', label: 'Meetings' },
-                { id: 'deadlines', label: 'Deadlines' }
-            ]
-        },
-        {
-            id: 'reports',
-            icon: BarChart3,
-            label: 'Reports & Analytics',
-            items: [
-                { id: 'project-reports', label: 'Project Reports' },
-                { id: 'team-performance', label: 'Team Performance' },
-                { id: 'custom-reports', label: 'Custom Reports' },
-                { id: 'export', label: 'Export' }
-            ]
+    const toggleMenu = (sectionId: string) => {
+        
+        const section = navigation.find(nav => nav.id === sectionId);
+        if (section && section.items.length > 0) {
+            setExpandedSections(prev => 
+                prev.includes(sectionId) 
+                    ? prev.filter(id => id !== sectionId)
+                    : [...prev, sectionId]
+            );
+        } else {
+          
+            setActivePage(sectionId);
         }
-    ];
+    };
 
- 
+    const handleItemClick = (itemId: string) => {
+        setActivePage(itemId);
+    };
+
+
     return (
         <div className="flex h-screen bg-gray-50">
             {/* Sidebar */}
@@ -151,11 +76,11 @@ const Home1 = () => {
                     <div className="flex items-center gap-1">
                         <div className=" flex ">
                             <Image
-                                src= {TeamflowLogo}   
+                                src={TeamflowLogo}
                                 alt="TeamFlow AI Logo"
-                                width={35}          
-                                height={35}         
-                                priority             
+                                width={35}
+                                height={35}
+                                priority
                             />
 
                         </div>
@@ -166,30 +91,36 @@ const Home1 = () => {
                 </div>
 
                 {/* Navigation */}
-                <ScrollArea className="flex-1 px-3 py-4">
-                    <nav className="space-y-1">
-                        {navigation.map((section) => (
+                <div className="flex-1 overflow-y-auto px-3 py-4">
+                    <nav className="space-y-0.5">
+                        {navigation.map((section, index) => (
                             <div key={section.id} className="mb-2">
                                 <button
-                                    onClick={() => ""}
-                                    className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                                    onClick={() => toggleMenu(section.id)}
+                                    className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                                        activePage === section.id && section.items.length === 0
+                                            ? 'bg-blue-50 text-blue-700'
+                                            : 'text-gray-700 hover:bg-gray-100'
+                                    }`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <section.icon className="w-5 h-5" />
                                         <span>{section.label}</span>
                                     </div>
-                                {expandedSections ?
-                                        <ChevronDown className="w-4 h-4" /> :
-                                        <ChevronRight className="w-4 h-4" />
-                                    } 
+
+                                    {section.items.length > 0 && (
+                                        expandedSections.includes(section.id) ? 
+                                            <ChevronDown className="w-4 h-4" /> : 
+                                            <ChevronRight className="w-4 h-4" />
+                                    )}
                                 </button>
 
-                                 {expandedSections && (
-                                    <div className="ml-8 mt-1 space-y-1">
+                                {expandedSections.includes(section.id) && section.items.length > 0 && (
+                                    <div className="ml-8 mt-1 space-y-0.5">
                                         {section.items.map((item) => (
                                             <button
                                                 key={item.id}
-                                                onClick={() => setActivePage(item.id)}
+                                                onClick={() => handleItemClick(item.id)}
                                                 className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors ${activePage === item.id
                                                     ? 'bg-blue-50 text-blue-700 font-medium'
                                                     : 'text-gray-600 hover:bg-gray-100'
@@ -199,14 +130,14 @@ const Home1 = () => {
                                             </button>
                                         ))}
                                     </div>
-                                )} 
+                                )}
                             </div>
                         ))}
                     </nav>
-                </ScrollArea>
+                </div>
 
                 {/* Bottom Section */}
-                <div className="border-t border-gray-200 p-3 space-y-1">
+                <div className="border-t border-gray-300 p-1 space-y-0.5">
                     <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
                         <Settings className="w-5 h-5" />
                         <span>Settings</span>
@@ -475,4 +406,4 @@ const Home1 = () => {
     );
 };
 
-export default Home1;
+export default Home;

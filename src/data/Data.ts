@@ -49,14 +49,10 @@ interface StatType {
 
 export const navigation: NavigationType[] = [
   {
-    id: "dashboards",
+    id: "dashboard",
     icon: Home,
-    label: "Dashboards",
-    items: [
-      { id: "personal-dashboard", label: "Personal Dashboard" },
-      { id: "project-dashboard", label: "Project Dashboard" },
-      { id: "agency-dashboard", label: "Agency Dashboard" },
-    ],
+    label: "Dashboard",
+    items: [],
   },
   {
     id: "projects",
@@ -67,7 +63,6 @@ export const navigation: NavigationType[] = [
       { id: "create-project", label: "Create Project" },
       { id: "milestones", label: "Milestones" },
       { id: "task-overview", label: "Task Overview" },
-      { id: "timeline-view", label: "Timeline View (Gantt)" },
     ],
   },
   {
@@ -79,16 +74,6 @@ export const navigation: NavigationType[] = [
       { id: "subtasks", label: "Subtasks" },
       { id: "time-tracking", label: "Time Tracking" },
       { id: "labels-tags", label: "Labels / Tags" },
-    ],
-  },
-  {
-    id: "team",
-    icon: Users,
-    label: "Team Collaboration",
-    items: [
-      { id: "messages", label: "Messages / Chat" },
-      { id: "activity-feed", label: "Activity Feed" },
-      { id: "notifications", label: "Notifications" },
     ],
   },
   {
@@ -105,7 +90,7 @@ export const navigation: NavigationType[] = [
   {
     id: "calendar",
     icon: Calendar,
-    label: "Calendar & Scheduling",
+    label: "Calendar",
     items: [
       { id: "calendar-view", label: "Calendar View" },
       { id: "meetings", label: "Meetings" },
@@ -123,6 +108,15 @@ export const navigation: NavigationType[] = [
       { id: "export", label: "Export" },
     ],
   },
+  {
+  id: "team-members",
+  label: "Team Members",
+  icon: Users,
+  items: [
+    { id: "add-member", label: "Add Member" },
+    { id: "manage-members", label: "Manage Members" },
+  ],
+}
 ];
 
 export const dummyProjects:dummyProjectsType[] = [
