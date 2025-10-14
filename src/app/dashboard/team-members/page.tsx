@@ -104,7 +104,7 @@ export default function TeamMembersPage() {
 
   const handleEditMember = () => {
     if (!editingMember) return;
-    
+
     const nameValid = formData.name.trim();
     const emailValid = formData.email.trim() && /\S+@\S+\.\S+/.test(formData.email);
     const roleValid = formData.role;
@@ -119,8 +119,8 @@ export default function TeamMembersPage() {
       return;
     }
 
-    setMembers(members.map(m => 
-      m.id === editingMember.id 
+    setMembers(members.map(m =>
+      m.id === editingMember.id
         ? { ...m, name: formData.name, email: formData.email, role: formData.role }
         : m
     ));
@@ -228,21 +228,7 @@ export default function TeamMembersPage() {
                         {member.email}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Select
-                          value={member.role}
-                          onValueChange={(value) => handleRoleChange(member.id, value)}
-                        >
-                          <SelectTrigger className="w-[150px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {roles.map((role) => (
-                              <SelectItem key={role} value={role}>
-                                {role}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        {member.role}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge

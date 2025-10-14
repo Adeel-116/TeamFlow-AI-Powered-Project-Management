@@ -12,15 +12,12 @@ import {
 import { LucideIcon } from "lucide-react";
 
 
-interface NavItemType {
-    id: string, 
-    label: string, 
-}
-interface NavigationType{
-    id: string, 
-    icon: LucideIcon, 
-    label: string,
-    items: NavItemType[]
+export interface NavItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  path?: string;
+  items: { id: string; label: string; path: string }[];
 }
 
 interface dummyProjectsType{
@@ -47,76 +44,77 @@ interface StatType {
 }
 
 
-export const navigation: NavigationType[] = [
+export const navigation: NavItem[] = [
   {
     id: "dashboard",
-    icon: Home,
     label: "Dashboard",
-    items: [],
+    icon: Home,
+    path: "/dashboard",
+    items: []
   },
   {
     id: "projects",
-    icon: FolderOpen,
     label: "Project Management",
+    icon: FolderOpen,
     items: [
-      { id: "all-projects", label: "All Projects" },
-      { id: "create-project", label: "Create Project" },
-      { id: "milestones", label: "Milestones" },
-      { id: "task-overview", label: "Task Overview" },
+      { id: "all-projects", label: "All Projects", path: "/dashboard/projects" },
+      { id: "create-project", label: "Create Project", path: "/dashboard/projects/create" },
+      { id: "milestones", label: "Milestones", path: "/dashboard/projects/milestones" },
+      { id: "task-overview", label: "Task Overview", path: "/dashboard/projects/tasks" },
     ],
   },
   {
     id: "tasks",
-    icon: CheckSquare,
     label: "Task Management",
+    icon: CheckSquare,
     items: [
-      { id: "my-tasks", label: "My Tasks" },
-      { id: "subtasks", label: "Subtasks" },
-      { id: "time-tracking", label: "Time Tracking" },
-      { id: "labels-tags", label: "Labels / Tags" },
+      { id: "my-tasks", label: "My Tasks", path: "/dashboard/tasks/my-tasks" },
+      { id: "subtasks", label: "Subtasks", path: "/dashboard/tasks/subtasks" },
+      { id: "time-tracking", label: "Time Tracking", path: "/dashboard/tasks/time-tracking" },
+      { id: "labels-tags", label: "Labels / Tags", path: "/dashboard/tasks/labels-tags" },
     ],
   },
   {
     id: "files",
-    icon: FileText,
     label: "File Management",
+    icon: FileText,
     items: [
-      { id: "documents", label: "Documents" },
-      { id: "uploads", label: "Uploads" },
-      { id: "version-control", label: "Version Control" },
-      { id: "file-search", label: "File Search" },
+      { id: "documents", label: "Documents", path: "/dashboard/files/documents" },
+      { id: "uploads", label: "Uploads", path: "/dashboard/files/uploads" },
+      { id: "version-control", label: "Version Control", path: "/dashboard/files/version-control" },
+      { id: "file-search", label: "File Search", path: "/dashboard/files/search" },
     ],
   },
   {
     id: "calendar",
-    icon: Calendar,
     label: "Calendar",
+    icon: Calendar,
     items: [
-      { id: "calendar-view", label: "Calendar View" },
-      { id: "meetings", label: "Meetings" },
-      { id: "deadlines", label: "Deadlines" },
+      { id: "calendar-view", label: "Calendar View", path: "/dashboard/calendar" },
+      { id: "meetings", label: "Meetings", path: "/dashboard/calendar/meetings" },
+      { id: "deadlines", label: "Deadlines", path: "/dashboard/calendar/deadlines" },
     ],
   },
   {
     id: "reports",
-    icon: BarChart3,
     label: "Reports & Analytics",
+    icon: BarChart3,
     items: [
-      { id: "project-reports", label: "Project Reports" },
-      { id: "team-performance", label: "Team Performance" },
-      { id: "custom-reports", label: "Custom Reports" },
-      { id: "export", label: "Export" },
+      { id: "project-reports", label: "Project Reports", path: "/dashboard/reports/projects" },
+      { id: "team-performance", label: "Team Performance", path: "/dashboard/reports/team" },
+      { id: "custom-reports", label: "Custom Reports", path: "/dashboard/reports/custom" },
+      { id: "export", label: "Export", path: "/dashboard/reports/export" },
     ],
   },
   {
-  id: "team-members",
-  label: "Team Members",
-  icon: Users,
-  items: [
-    { id: "add-member", label: "Add Member" },
-    { id: "manage-members", label: "Manage Members" },
-  ],
-}
+    id: "team-members",
+    label: "Team Members",
+    icon: Users,
+    items: [
+      { id: "add-member", label: "Add Member", path: "/dashboard/team-members" },
+      { id: "manage-members", label: "Manage Members", path: "/dashboard/team/manage" },
+    ],
+  },
 ];
 
 export const dummyProjects:dummyProjectsType[] = [
