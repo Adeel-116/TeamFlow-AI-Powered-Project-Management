@@ -57,10 +57,10 @@ export const navigation: NavItem[] = [
     label: "Project Management",
     icon: FolderOpen,
     items: [
-      { id: "all-projects", label: "All Projects", path: "/dashboard/projects" },
-      { id: "create-project", label: "Create Project", path: "/dashboard/projects/create" },
+      { id: "all-projects", label: "All Projects", path: "/dashboard/projects/all-projects" },
+      { id: "create-project", label: "Create Project", path: "/dashboard/projects/add-project" },
       { id: "milestones", label: "Milestones", path: "/dashboard/projects/milestones" },
-      { id: "task-overview", label: "Task Overview", path: "/dashboard/projects/tasks" },
+      { id: "task-overview", label: "Task Overview", path: "/dashboard/projects/task-overview" },
     ],
   },
   {
@@ -75,22 +75,11 @@ export const navigation: NavItem[] = [
     ],
   },
   {
-    id: "files",
-    label: "File Management",
-    icon: FileText,
-    items: [
-      { id: "documents", label: "Documents", path: "/dashboard/files/documents" },
-      { id: "uploads", label: "Uploads", path: "/dashboard/files/uploads" },
-      { id: "version-control", label: "Version Control", path: "/dashboard/files/version-control" },
-      { id: "file-search", label: "File Search", path: "/dashboard/files/search" },
-    ],
-  },
-  {
     id: "calendar",
     label: "Calendar",
     icon: Calendar,
     items: [
-      { id: "calendar-view", label: "Calendar View", path: "/dashboard/calendar" },
+      { id: "calendar-view", label: "Calendar View", path: "/dashboard/calendar/calendar-view" },
       { id: "meetings", label: "Meetings", path: "/dashboard/calendar/meetings" },
       { id: "deadlines", label: "Deadlines", path: "/dashboard/calendar/deadlines" },
     ],
@@ -100,8 +89,8 @@ export const navigation: NavItem[] = [
     label: "Reports & Analytics",
     icon: BarChart3,
     items: [
-      { id: "project-reports", label: "Project Reports", path: "/dashboard/reports/projects" },
-      { id: "team-performance", label: "Team Performance", path: "/dashboard/reports/team" },
+      { id: "project-reports", label: "Project Reports", path: "/dashboard/reports-analytics/reports" },
+      { id: "team-performance", label: "Team Performance", path: "/dashboard/reports-analytics/team-performance" },
       { id: "custom-reports", label: "Custom Reports", path: "/dashboard/reports/custom" },
       { id: "export", label: "Export", path: "/dashboard/reports/export" },
     ],
