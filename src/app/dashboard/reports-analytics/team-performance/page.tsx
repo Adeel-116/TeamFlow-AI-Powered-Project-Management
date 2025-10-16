@@ -12,10 +12,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Users, TrendingUp, Award, Clock, Filter, BarChart3, Target, CheckCircle2 } from "lucide-react"
-import * as Chart from "chart.js"
+import * as Chart from "chart.js";
+const { Chart: ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, BarController } = Chart
 
-const { Chart: ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } = Chart
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, Title, Tooltip, Legend)
+
 
 type PerformanceStatus = "Excellent" | "Good" | "Needs Improvement"
 

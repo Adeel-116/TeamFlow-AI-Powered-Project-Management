@@ -3,8 +3,8 @@ import {
   FolderOpen,
   CheckSquare,
   Users,
-  FileText,
   Calendar,
+  MessageSquare,
   BarChart3,
   Clock,
   Target,
@@ -91,8 +91,6 @@ export const navigation: NavItem[] = [
     items: [
       { id: "project-reports", label: "Project Reports", path: "/dashboard/reports-analytics/reports" },
       { id: "team-performance", label: "Team Performance", path: "/dashboard/reports-analytics/team-performance" },
-      { id: "custom-reports", label: "Custom Reports", path: "/dashboard/reports/custom" },
-      { id: "export", label: "Export", path: "/dashboard/reports/export" },
     ],
   },
   {
@@ -101,10 +99,20 @@ export const navigation: NavItem[] = [
     icon: Users,
     items: [
       { id: "add-member", label: "Add Member", path: "/dashboard/team-members" },
-      { id: "manage-members", label: "Manage Members", path: "/dashboard/team/manage" },
+    ],
+  },
+
+  {
+    id: "chat",
+    label: "Chat / Messages",
+    icon: MessageSquare, 
+    items: [
+      { id: "channels", label: "Channels / Threads", path: "/dashboard/chats/channels&threads" },
+      { id: "direct-messages", label: "Direct Messages (DMs)", path: "/dashboard/chats/dms" },
     ],
   },
 ];
+
 
 export const dummyProjects:dummyProjectsType[] = [
   {

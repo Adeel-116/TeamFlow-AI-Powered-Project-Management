@@ -8,12 +8,36 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Download, BarChart3, PieChart as PieChartIcon, Filter, FolderKanban, CheckCircle2, Clock, Pause } from "lucide-react"
-import * as Chart from "chart.js"
+import { Download, BarChart3, Filter, FolderKanban, CheckCircle2, Clock, Pause, Target } from "lucide-react"
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  DoughnutController,
+  LineController
+} from "chart.js"
 
-
-const { Chart: ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend } = Chart
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend)
+// Register ALL required Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  DoughnutController,
+  LineController
+)
 
 interface ProjectReport {
   id: string
@@ -126,15 +150,8 @@ const PROGRESS_TREND: ProgressTrend[] = [
 ]
 
 export default function ProjectReportsPage() {
-
-  const [time, setTime] = useState("");
-
-  useEffect(() => {
-    setTime(new Date().toLocaleTimeString());
-  }, []);
-
-  
-  const [projects, setProjects] = useState<ProjectReport[]>(DUMMY_PROJECTS)
+  const [mounted, setMounted] = useState(false)
+  const [projects] = useState<ProjectReport[]>(DUMMY_PROJECTS)
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [projectFilter, setProjectFilter] = useState<string>("all")
   const [startDate, setStartDate] = useState("")
@@ -142,8 +159,12 @@ export default function ProjectReportsPage() {
   
   const pieChartRef = useRef<HTMLCanvasElement>(null)
   const trendChartRef = useRef<HTMLCanvasElement>(null)
-  const pieChartInstance = useRef<any>(null)
-  const trendChartInstance = useRef<any>(null)
+  const pieChartInstance = useRef<ChartJS | null>(null)
+  const trendChartInstance = useRef<ChartJS | null>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const filteredProjects = useMemo(() => {
     return projects.filter(project => {
@@ -179,125 +200,125 @@ export default function ProjectReportsPage() {
   }, [stats])
 
   useEffect(() => {
-    if (pieChartRef.current) {
-      if (pieChartInstance.current) {
-        pieChartInstance.current.destroy()
-      }
+    if (!mounted || !pieChartRef.current) return
 
-      const ctx = pieChartRef.current.getContext("2d")
-      if (ctx) {
-        pieChartInstance.current = new ChartJS(ctx, {
-          type: "doughnut",
-          data: {
-            labels: statusBreakdown.labels,
-            datasets: [{
-              data: statusBreakdown.data,
-              backgroundColor: statusBreakdown.colors,
-              borderWidth: 2,
-              borderColor: "#fff"
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: "bottom",
-                labels: {
-                  padding: 15,
-                  font: { size: 12 }
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: (context) => {
-                    const label = context.label || ""
-                    const value = context.parsed || 0
-                    const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0)
-                    const percentage = ((value / total) * 100).toFixed(1)
-                    return `${label}: ${value} (${percentage}%)`
-                  }
-                }
-              }
-            }
-          }
-        })
-      }
+    if (pieChartInstance.current) {
+      pieChartInstance.current.destroy()
     }
 
-    return () => {
-      if (pieChartInstance.current) {
-        pieChartInstance.current.destroy()
-      }
-    }
-  }, [statusBreakdown])
-
-  useEffect(() => {
-    if (trendChartRef.current) {
-      if (trendChartInstance.current) {
-        trendChartInstance.current.destroy()
-      }
-
-      const ctx = trendChartRef.current.getContext("2d")
-      if (ctx) {
-        trendChartInstance.current = new ChartJS(ctx, {
-          type: "line",
-          data: {
-            labels: PROGRESS_TREND.map(t => t.month),
-            datasets: [
-              {
-                label: "Completed",
-                data: PROGRESS_TREND.map(t => t.completed),
-                borderColor: "#10b981",
-                backgroundColor: "rgba(16, 185, 129, 0.1)",
-                tension: 0.4,
-                fill: true
-              },
-              {
-                label: "In Progress",
-                data: PROGRESS_TREND.map(t => t.inProgress),
-                borderColor: "#3b82f6",
-                backgroundColor: "rgba(59, 130, 246, 0.1)",
-                tension: 0.4,
-                fill: true
-              },
-              {
-                label: "On Hold",
-                data: PROGRESS_TREND.map(t => t.onHold),
-                borderColor: "#f59e0b",
-                backgroundColor: "rgba(245, 158, 11, 0.1)",
-                tension: 0.4,
-                fill: true
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: "top",
-                labels: {
-                  padding: 15,
-                  font: { size: 12 }
-                }
-              },
-              tooltip: {
-                mode: "index",
-                intersect: false
+    const ctx = pieChartRef.current.getContext("2d")
+    if (ctx) {
+      pieChartInstance.current = new ChartJS(ctx, {
+        type: "doughnut",
+        data: {
+          labels: statusBreakdown.labels,
+          datasets: [{
+            data: statusBreakdown.data,
+            backgroundColor: statusBreakdown.colors,
+            borderWidth: 2,
+            borderColor: "#fff"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                padding: 15,
+                font: { size: 12 }
               }
             },
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  stepSize: 1
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const label = context.label || ""
+                  const value = context.parsed || 0
+                  const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0)
+                  const percentage = ((value / total) * 100).toFixed(1)
+                  return `${label}: ${value} (${percentage}%)`
                 }
               }
             }
           }
-        })
+        }
+      })
+    }
+
+    return () => {
+      if (pieChartInstance.current) {
+        pieChartInstance.current.destroy()
       }
+    }
+  }, [mounted, statusBreakdown])
+
+  useEffect(() => {
+    if (!mounted || !trendChartRef.current) return
+
+    if (trendChartInstance.current) {
+      trendChartInstance.current.destroy()
+    }
+
+    const ctx = trendChartRef.current.getContext("2d")
+    if (ctx) {
+      trendChartInstance.current = new ChartJS(ctx, {
+        type: "line",
+        data: {
+          labels: PROGRESS_TREND.map(t => t.month),
+          datasets: [
+            {
+              label: "Completed",
+              data: PROGRESS_TREND.map(t => t.completed),
+              borderColor: "#10b981",
+              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: "In Progress",
+              data: PROGRESS_TREND.map(t => t.inProgress),
+              borderColor: "#3b82f6",
+              backgroundColor: "rgba(59, 130, 246, 0.1)",
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: "On Hold",
+              data: PROGRESS_TREND.map(t => t.onHold),
+              borderColor: "#f59e0b",
+              backgroundColor: "rgba(245, 158, 11, 0.1)",
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "top",
+              labels: {
+                padding: 15,
+                font: { size: 12 }
+              }
+            },
+            tooltip: {
+              mode: "index",
+              intersect: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          }
+        }
+      })
     }
 
     return () => {
@@ -305,7 +326,7 @@ export default function ProjectReportsPage() {
         trendChartInstance.current.destroy()
       }
     }
-  }, [])
+  }, [mounted])
 
   const handleDownloadReport = () => {
     console.log("Downloading report as CSV...")
@@ -319,6 +340,10 @@ export default function ProjectReportsPage() {
     setEndDate("")
   }
 
+  if (!mounted) {
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
       <motion.div
@@ -326,7 +351,6 @@ export default function ProjectReportsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-7xl mx-auto space-y-6"
       >
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Project Reports</h1>
@@ -338,7 +362,6 @@ export default function ProjectReportsPage() {
           </Button>
         </div>
 
-        {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -417,7 +440,6 @@ export default function ProjectReportsPage() {
           </motion.div>
         </div>
 
-        {/* Filters */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -490,7 +512,6 @@ export default function ProjectReportsPage() {
           </CardContent>
         </Card>
 
-        {/* Charts Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -500,7 +521,7 @@ export default function ProjectReportsPage() {
             <Card className="h-full">
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <PieChartIcon className="w-5 h-5 text-gray-600" />
+                  <Target className="w-5 h-5 text-gray-600" />
                   <CardTitle>Project Status Breakdown</CardTitle>
                 </div>
               </CardHeader>
@@ -533,7 +554,6 @@ export default function ProjectReportsPage() {
           </motion.div>
         </div>
 
-        {/* Project Details Table */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -583,7 +603,7 @@ export default function ProjectReportsPage() {
                       </div>
                       <div>
                         <p className="text-gray-600">Deadline</p>
-                        <p className="font-medium text-gray-900">{""}</p>
+                        <p className="font-medium text-gray-900">{new Date(project.deadline).toLocaleDateString()}</p>
                       </div>
                     </div>
                   </motion.div>
