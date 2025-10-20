@@ -136,6 +136,15 @@ export const navigation: NavItem[] = [
       { id: "manage-members", label: "Manage Members", path: "/dashboard/team-members/manage-members" },
     ],
   },
+  {
+    id: "communication",
+    label: "Communication",
+    icon: Clock, 
+    items: [
+      { id: "channel", label: "Chat", path: "/dashboard/chats/channels&threads" },
+      { id: "direct-messages", label: "Direct Messages", path: "/dashboard/chats/dms" },
+    ],
+  },
 ];
 
 export const dummyProjects: dummyProjectsType[] = [

@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
+import SuccessPopup from '@/components/ui/SuccessPopup';
 type TeamMember = {
   id: string;
   name: string;
@@ -91,27 +91,14 @@ function EditMemberModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-2xl w-full mx-4 relative">
-        {/* Success Popup */}
+  
         {showSuccess && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
-              <div className="bg-green-100 rounded-full p-4 mx-auto mb-4 w-fit">
-                <Check className="h-12 w-12 text-green-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                Member Updated Successfully!
-              </h2>
-              <Button
-                onClick={() => {
-                  setShowSuccess(false);
-                  onClose();
-                }}
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 mt-4"
-              >
-                OK
-              </Button>
-            </div>
-          </div>
+             <SuccessPopup
+                              show={showSuccess}
+                              onClose={() => setShowSuccess(false)}
+                              title="Update Data Successfully!"
+                              icon={Check}
+                          />
         )}
 
         {/* Header */}
@@ -271,6 +258,7 @@ export default function TeamMembersPage() {
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -297,7 +285,7 @@ export default function TeamMembersPage() {
 
   const handleDelete = async (email: string) => {
     if (!confirm('Are you sure you want to delete this member?')) return;
-    
+     
     try {
       await fetch('/api/users', {
         method: 'DELETE',
@@ -332,6 +320,8 @@ export default function TeamMembersPage() {
         }} 
         member={selectedMember}
       />
+
+    
       
       <div className="min-h-screen bg-gray-50 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">

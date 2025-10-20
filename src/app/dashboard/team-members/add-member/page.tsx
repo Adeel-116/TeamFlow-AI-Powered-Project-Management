@@ -6,22 +6,20 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { UserPlus, Loader2, Sparkles, Check } from "lucide-react"
+import SuccessPopup from "@/components/ui/SuccessPopup"
 
 export default function AddMemberPage() {
-    const roles = ["admin", "manager", "member"]
     const levels = ["senior", "mid", "junior", "intern"]
     const departments = ["Development", "Design", "Marketing", "HR", "Sales"]
-    const statuses = ["active", "inactive"]
 
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         password: "",
-        role: "",
         designation: "",
         level: "",
         department: "",
-        status: "",
+        status: "active", 
     })
 
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -34,91 +32,49 @@ export default function AddMemberPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
-            });
+            })
 
-            const data = await res.json();
+            const data = await res.json()
             if (data.success) {
-                console.log('User added successfully:', data);
+                console.log('User added successfully:', data)
                 setShowSuccess(true)
                 setFormData({
                     name: "",
                     email: "",
                     password: "",
-                    role: "",
                     designation: "",
                     level: "",
                     department: "",
-                    status: "",
+                    status: "active", 
                 })
                 setIsSubmitting(false)
             } else {
-                console.error('Error:', data.message);
+                console.error('Error:', data.message)
                 setShowSuccess(false)
                 setIsSubmitting(false)
             }
         } catch (error) {
-            console.error('Failed to add member:', error);
+            console.error('Failed to add member:', error)
             setShowSuccess(false)
             setIsSubmitting(false)
         }
-    };
+    }
 
     const handleCancel = () => {
         setFormData({
             name: "",
             email: "",
             password: "",
-            role: "",
             designation: "",
             level: "",
             department: "",
-            status: "",
+            status: "active", 
         })
     }
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center py-10 px-4 relative overflow-hidden">
-
-
-            <div className="w-full max-w-4xl relative z-10">
-                {/* Success Popup */}
-                {showSuccess && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-                        <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4 text-center animate-in zoom-in duration-300 relative">
-                            {/* Success Icon */}
-                            <div className="bg-green-100 rounded-full p-4 mx-auto mb-4 w-fit">
-                                <Check className="h-12 w-12 text-green-600" />
-                            </div>
-
-                            {/* Title & Message */}
-                            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                                Member Added Successfully!
-                            </h2>
-                            <p className="text-gray-600 mb-6">
-                                Your new team member has been added successfully.
-                            </p>
-
-                            {/* Buttons */}
-                            <div className="flex justify-center gap-4">
-                                <Button
-                                    onClick={() => setShowSuccess(false)}
-                                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6"
-                                >
-                                    OK
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setShowSuccess(false)}
-                                    className="px-6 hover:bg-gray-100"
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Main Card */}
+            <div className="w-full md:max-w-4xl lg:max-w-6xl relative z-10">
                 <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20 transition-all duration-300 hover:shadow-3xl">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
@@ -175,26 +131,6 @@ export default function AddMemberPage() {
                             />
                         </div>
 
-                        {/* Role */}
-                        <div className="space-y-2">
-                            <Label htmlFor="role">Role</Label>
-                            <Select
-                                value={formData.role}
-                                onValueChange={(value) => setFormData({ ...formData, role: value })}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a role" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {roles.map((role) => (
-                                        <SelectItem key={role} value={role}>
-                                            {role.charAt(0).toUpperCase() + role.slice(1)}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
                         {/* Designation */}
                         <div className="space-y-2">
                             <Label htmlFor="designation">Designation</Label>
@@ -246,24 +182,15 @@ export default function AddMemberPage() {
                             </Select>
                         </div>
 
-                        {/* Status */}
+                        {/* Status (read-only) */}
                         <div className="space-y-2">
                             <Label htmlFor="status">Status</Label>
-                            <Select
-                                value={formData.status}
-                                onValueChange={(value) => setFormData({ ...formData, status: value })}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {statuses.map((status) => (
-                                        <SelectItem key={status} value={status}>
-                                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <Input
+                                id="status"
+                                value="Active"
+                                disabled
+                                className="bg-gray-100 cursor-not-allowed"
+                            />
                         </div>
                     </div>
 
@@ -296,6 +223,16 @@ export default function AddMemberPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Success popup */}
+            {showSuccess && (
+                <SuccessPopup
+                    show={showSuccess}
+                    onClose={() => setShowSuccess(false)}
+                    title="Member Added Successfully!"
+                    icon={Check}
+                />
+            )}
         </div>
     )
 }

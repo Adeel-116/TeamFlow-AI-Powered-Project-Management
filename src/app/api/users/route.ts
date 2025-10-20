@@ -7,13 +7,12 @@ export async function POST(request:Request ) {
     console.log(getData)
 
     const sentData = await pool.query(
-  `INSERT INTO usersData (name, email, password, role, designation, level, department, status)
-   VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+  `INSERT INTO usersData (name, email, password, designation, level, department, status)
+   VALUES ($1, $2, $3, $4, $5, $6, $7)`,
   [
     getData.name,
     getData.email,
     getData.password,
-    getData.role,
     getData.designation,
     getData.level,
     getData.department,
@@ -61,13 +60,12 @@ export async function PUT(req: Request) {
       `UPDATE usersData 
        SET name = $1, 
            email = $2, 
-           role = $3, 
-           designation = $4, 
-           level = $5, 
-           department = $6, 
-           status = $7 
-       WHERE ID = $8`,
-      [body.name, body.email, body.role, body.designation, body.level, body.department, body.status, body.id]
+           designation = $3, 
+           level = $4, 
+           department = $5, 
+           status = $6 
+       WHERE ID = $7`,
+      [body.name, body.email, body.designation, body.level, body.department, body.status, body.id]
     );
 
     return NextResponse.json({ message: "Member updated successfully" }, { status: 200 });
