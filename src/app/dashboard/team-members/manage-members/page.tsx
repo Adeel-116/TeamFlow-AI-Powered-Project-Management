@@ -1,70 +1,41 @@
 'use client'
-import React, { useState } from 'react';
-import { Search, Plus, MoreVertical, Pencil, Trash2, UserPlus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Plus, Pencil, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 type TeamMember = {
   id: string;
   name: string;
   email: string;
   role: string;
-  status: 'Active' | 'Inactive';
+  designation: string;
+  level: string;
+  department: string;
+  status: string;
+  created_at: string;
 };
 
-const initialMembers: TeamMember[] = [
-  { id: '1', name: 'Sarah Johnson', email: 'sarah.j@company.com', role: 'Developer', status: 'Active' },
-  { id: '2', name: 'Michael Chen', email: 'michael.c@company.com', role: 'Designer', status: 'Active' },
-  { id: '3', name: 'Emma Williams', email: 'emma.w@company.com', role: 'QA', status: 'Active' },
-  { id: '4', name: 'James Brown', email: 'james.b@company.com', role: 'Developer', status: 'Inactive' },
-  { id: '5', name: 'Olivia Davis', email: 'olivia.d@company.com', role: 'Product Manager', status: 'Active' },
-];
-
-const roles = ['Developer', 'Designer', 'QA', 'Product Manager', 'DevOps', 'Marketing'];
-
 export default function TeamMembersPage() {
-  const [members, setMembers] = useState<TeamMember[]>(initialMembers);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    role: '',
-    password: '',
-  });
-  const [errors, setErrors] = useState({
-    name: false,
-    email: false,
-    role: false,
-    password: false,
-  });
+  const [team, setTeam] = useState<TeamMember[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/users');
+        const data = await res.json();
+        setTeam(data.getData.rows);
+      } catch (err) {
+        console.log('Error occurred:', err);
+      }
+    };
+
+    fetchData();
+  },[]);
 
   const getInitials = (name: string) => {
     return name
@@ -75,86 +46,19 @@ export default function TeamMembersPage() {
       .slice(0, 2);
   };
 
-  const validateForm = () => {
-    const newErrors = {
-      name: !formData.name.trim(),
-      email: !formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email),
-      role: !formData.role,
-      password: !formData.password || formData.password.length < 6,
-    };
-    setErrors(newErrors);
-    return !Object.values(newErrors).some(Boolean);
-  };
-
-  const handleAddMember = () => {
-    if (!validateForm()) return;
-
-    const newMember: TeamMember = {
-      id: Date.now().toString(),
-      name: formData.name,
-      email: formData.email,
-      role: formData.role,
-      status: 'Active',
-    };
-
-    setMembers([...members, newMember]);
-    setIsAddModalOpen(false);
-    resetForm();
-  };
-
-  const handleEditMember = () => {
-    if (!editingMember) return;
-
-    const nameValid = formData.name.trim();
-    const emailValid = formData.email.trim() && /\S+@\S+\.\S+/.test(formData.email);
-    const roleValid = formData.role;
-
-    if (!nameValid || !emailValid || !roleValid) {
-      setErrors({
-        name: !nameValid,
-        email: !emailValid,
-        role: !roleValid,
-        password: false,
-      });
-      return;
-    }
-
-    setMembers(members.map(m =>
-      m.id === editingMember.id
-        ? { ...m, name: formData.name, email: formData.email, role: formData.role }
-        : m
-    ));
-    setIsEditModalOpen(false);
-    setEditingMember(null);
-    resetForm();
-  };
-
-  const handleDeleteMember = (id: string) => {
-    setMembers(members.filter(m => m.id !== id));
-  };
-
-  const openEditModal = (member: TeamMember) => {
-    setEditingMember(member);
-    setFormData({
-      name: member.name,
-      email: member.email,
-      role: member.role,
-      password: '',
+  const handleDelete = async (email: string) => {
+  try {
+    await fetch('/api/users', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
     });
-    setErrors({ name: false, email: false, role: false, password: false });
-    setIsEditModalOpen(true);
-  };
+  } catch (err) {
+    console.error('Error deleting member:', err);
+  }
+};
 
-  const resetForm = () => {
-    setFormData({ name: '', email: '', role: '', password: '' });
-    setErrors({ name: false, email: false, role: false, password: false });
-  };
-
-  const handleRoleChange = (memberId: string, newRole: string) => {
-    setMembers(members.map(m => m.id === memberId ? { ...m, role: newRole } : m));
-  };
-
-  const filteredMembers = members.filter(m =>
+  const filteredMembers = team.filter(m =>
     m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.role.toLowerCase().includes(searchQuery.toLowerCase())
@@ -180,56 +84,49 @@ export default function TeamMembersPage() {
                   className="pl-10"
                 />
               </div>
-              <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+              {/* Add Member Button */}
+              <Button className="gap-2">
                 <Plus className="h-4 w-4" />
                 Add Member
               </Button>
             </div>
           </CardHeader>
+
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Member
-                    </th>
-                    <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Role
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
+
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredMembers.map((member) => (
+                  {filteredMembers.map(member => (
                     <tr key={member.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
-                              {getInitials(member.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium text-gray-900">{member.name}</div>
-                            <div className="text-sm text-gray-500 md:hidden">{member.email}</div>
-                          </div>
-                        </div>
+                      <td className="px-6 py-4 whitespace-nowrap">{member.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap flex items-center gap-3">
+                        <Avatar>
+                          <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                            {getInitials(member.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>{member.name}</div>
                       </td>
-                      <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-gray-600">
-                        {member.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {member.role}
-                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">{member.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{member.role}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{member.designation}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{member.level}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{member.department}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge
                           variant={member.status === 'Active' ? 'default' : 'secondary'}
@@ -238,27 +135,10 @@ export default function TeamMembersPage() {
                           {member.status}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => openEditModal(member)}>
-                              <Pencil className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteMember(member.id)}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                      <td className="px-6 py-4 whitespace-nowrap">{new Date(member.created_at).toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap flex gap-2">
+                        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={()=>handleDelete(member.email)}><Trash2 className="h-4 w-4" /></Button>
                       </td>
                     </tr>
                   ))}
@@ -267,149 +147,8 @@ export default function TeamMembersPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Add Member Modal */}
-        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <UserPlus className="h-5 w-5" />
-                Add New Member
-              </DialogTitle>
-              <DialogDescription>
-                Fill in the details to add a new team member.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
-                <Input
-                  id="name"
-                  placeholder="John Doe"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className={errors.name ? 'border-red-500' : ''}
-                />
-                {errors.name && <p className="text-sm text-red-500">Name is required</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="john@company.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className={errors.email ? 'border-red-500' : ''}
-                />
-                {errors.email && <p className="text-sm text-red-500">Valid email is required</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Role *</Label>
-                <Select
-                  value={formData.role}
-                  onValueChange={(value) => setFormData({ ...formData, role: value })}
-                >
-                  <SelectTrigger className={errors.role ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.role && <p className="text-sm text-red-500">Role is required</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password *</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Min. 6 characters"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={errors.password ? 'border-red-500' : ''}
-                />
-                {errors.password && (
-                  <p className="text-sm text-red-500">Password must be at least 6 characters</p>
-                )}
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => { setIsAddModalOpen(false); resetForm(); }}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddMember}>Add Member</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit Member Modal */}
-        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Pencil className="h-5 w-5" />
-                Edit Member
-              </DialogTitle>
-              <DialogDescription>
-                Update member information.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-name">Full Name *</Label>
-                <Input
-                  id="edit-name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className={errors.name ? 'border-red-500' : ''}
-                />
-                {errors.name && <p className="text-sm text-red-500">Name is required</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-email">Email *</Label>
-                <Input
-                  id="edit-email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className={errors.email ? 'border-red-500' : ''}
-                />
-                {errors.email && <p className="text-sm text-red-500">Valid email is required</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-role">Role *</Label>
-                <Select
-                  value={formData.role}
-                  onValueChange={(value) => setFormData({ ...formData, role: value })}
-                >
-                  <SelectTrigger className={errors.role ? 'border-red-500' : ''}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.role && <p className="text-sm text-red-500">Role is required</p>}
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => { setIsEditModalOpen(false); resetForm(); }}>
-                Cancel
-              </Button>
-              <Button onClick={handleEditMember}>Save Changes</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
 }
+
