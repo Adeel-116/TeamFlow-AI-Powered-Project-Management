@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { dummyProjects, stats, recentTasks, } from "../../data/Data"
 
-
 function HomeContent() {
     return (
         <div className='p-6 space-y-6'>
