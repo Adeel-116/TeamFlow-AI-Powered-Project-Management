@@ -1,4 +1,5 @@
 import { pool } from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request:Request ) {
     
@@ -45,4 +46,33 @@ export async function DELETE(req:Request){
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
 
+}
+
+export async function PUT(req: Request) {
+  try {
+     const body = await req.json();
+    console.log(body)
+
+    if (!body.id || !body.name || !body.email) {
+      return NextResponse.json({ message: "ID, name, and email are required" }, { status: 400 });
+    }
+
+    await pool.query(
+      `UPDATE usersData 
+       SET name = $1, 
+           email = $2, 
+           role = $3, 
+           designation = $4, 
+           level = $5, 
+           department = $6, 
+           status = $7 
+       WHERE ID = $8`,
+      [body.name, body.email, body.role, body.designation, body.level, body.department, body.status, body.id]
+    );
+
+    return NextResponse.json({ message: "Member updated successfully" }, { status: 200 });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ message: "Failed to update member" }, { status: 500 });
+  }
 }
