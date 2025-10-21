@@ -27,13 +27,21 @@ export async function GET(req: Request) {
     return Response.json({success: true, message: "GET data Form DataBase", getData: result})
 }
 
-export async function DELETE(req:Request){
-    const getData = await req.json();
-    console.log(getData);
+export async function DELETE(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
+
+    if (!id) {
+      return new Response(
+        JSON.stringify({ success: false, message: "No ID provided" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
     const deleteRecord = await pool.query(
-      'DELETE FROM usersData WHERE email = $1',
-      [getData.email]
+      "DELETE FROM usersData WHERE id = $1",
+      [id]
     );
 
     return new Response(
@@ -42,9 +50,15 @@ export async function DELETE(req:Request){
         message: "Deleted data from database",
         deletedRecord: deleteRecord,
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { status: 200, headers: { "Content-Type": "application/json" } }
     );
-
+  } catch (err) {
+    console.error(err);
+    return new Response(
+      JSON.stringify({ success: false, message: "Failed to delete" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
 }
 
 export async function PUT(req: Request) {

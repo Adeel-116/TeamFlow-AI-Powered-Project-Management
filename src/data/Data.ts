@@ -132,8 +132,7 @@ export const navigation: NavItem[] = [
     label: "Team Members",
     icon: Users,
     items: [
-      { id: "add-member", label: "Add Member", path: "/dashboard/team-members/add-member" },
-      { id: "manage-members", label: "Manage Members", path: "/dashboard/team-members/manage-members" },
+      { id: "add-member", label: "Manage Team Member", path: "/dashboard/teams/manage-members" },
     ],
   },
   {
