@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 import SuccessPopup from '@/components/ui/SuccessPopup';
 type TeamMember = {
   id: string;
@@ -27,13 +29,13 @@ const levels = ['junior', 'mid', 'senior', 'lead', 'principal'];
 const departments = ['Engineering', 'Design', 'Product', 'Marketing', 'Sales', 'HR'];
 const statuses = ['active', 'inactive', 'on-leave'];
 
-function EditMemberModal({ 
-  show, 
-  onClose, 
-  member 
-}: { 
-  show: boolean; 
-  onClose: () => void; 
+function EditMemberModal({
+  show,
+  onClose,
+  member
+}: {
+  show: boolean;
+  onClose: () => void;
   member: TeamMember | null;
 }) {
   const [formData, setFormData] = useState({
@@ -91,14 +93,14 @@ function EditMemberModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-2xl w-full mx-4 relative">
-  
+
         {showSuccess && (
-             <SuccessPopup
-                              show={showSuccess}
-                              onClose={() => setShowSuccess(false)}
-                              title="Update Data Successfully!"
-                              icon={Check}
-                          />
+          <SuccessPopup
+            show={showSuccess}
+            onClose={() => setShowSuccess(false)}
+            title="Update Data Successfully!"
+            icon={Check}
+          />
         )}
 
         {/* Header */}
@@ -252,13 +254,17 @@ function EditMemberModal({
   );
 }
 
+
+
 export default function TeamMembersPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('');
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
-  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<TeamMember | null>(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -283,26 +289,36 @@ export default function TeamMembersPage() {
       .slice(0, 2);
   };
 
-  const handleDelete = async (email: string) => {
-    if (!confirm('Are you sure you want to delete this member?')) return;
-     
-    try {
-      await fetch('/api/users', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      // Refresh the team list
-      setTeam(team.filter(m => m.email !== email));
-    } catch (err) {
-      console.error('Error deleting member:', err);
-    }
-  };
+
 
   const handleEdit = (member: TeamMember) => {
     setSelectedMember(member);
     setShowEditModal(true);
   };
+
+  const handleDelete = (member: TeamMember) => {
+  setMemberToDelete(member);
+  setOpenDeleteDialog(true);
+};
+
+const confirmDelete = async () => {
+  if (!memberToDelete) return;
+
+  try {
+    await fetch("/api/users", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: memberToDelete.email }),
+    });
+
+    setTeam(team.filter((m) => m.email !== memberToDelete.email));
+    setOpenDeleteDialog(false);
+    setMemberToDelete(null);
+  } catch (err) {
+    console.error("Error deleting member:", err);
+  }
+};
+
 
   const filteredMembers = team.filter(m =>
     m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -312,17 +328,15 @@ export default function TeamMembersPage() {
 
   return (
     <>
-      <EditMemberModal 
-        show={showEditModal} 
+      <EditMemberModal
+        show={showEditModal}
         onClose={() => {
           setShowEditModal(false);
           setSelectedMember(null);
-        }} 
+        }}
         member={selectedMember}
       />
 
-    
-      
       <div className="min-h-screen bg-gray-50 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
@@ -342,8 +356,8 @@ export default function TeamMembersPage() {
                     className="pl-10"
                   />
                 </div>
-                
-                <Button className="gap-2" onClick={()=>router.push("/dashboard/team-members/add-member")}>
+
+                <Button className="gap-2" onClick={() => router.push("/dashboard/team-members/add-member")}>
                   <Plus className="h-4 w-4" />
                   Add Member
                 </Button>
@@ -398,7 +412,7 @@ export default function TeamMembersPage() {
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(member)}>
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(member.email)}>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(member)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </td>
@@ -409,6 +423,39 @@ export default function TeamMembersPage() {
               </div>
             </CardContent>
           </Card>
+
+
+           <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+            <AlertDialogContent className="sm:max-w-[400px]">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-lg font-semibold">
+                  Are you sure you want to delete?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. The selected member{" "}
+                  <span className="font-semibold text-red-600">
+                    {memberToDelete?.name}
+                  </span>{" "}
+                  will be permanently removed.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel className="rounded-lg px-4 py-2">No</AlertDialogCancel>
+                <AlertDialogAction asChild>
+                  <Button
+                    variant="destructive"
+                    onClick={confirmDelete}
+                    className="rounded-lg px-4 py-2"
+                  >
+                    Yes, Delete
+                  </Button>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          
         </div>
       </div>
     </>
