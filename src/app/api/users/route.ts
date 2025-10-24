@@ -7,23 +7,23 @@ export async function POST(request:Request ) {
     console.log(getData)
 
     const sentData = await pool.query(
-  `INSERT INTO usersData (name, email, password, designation, level, department, status)
+  `INSERT INTO team_members (name, email, designation, level, department, status, password)
    VALUES ($1, $2, $3, $4, $5, $6, $7)`,
   [
     getData.name,
     getData.email,
-    getData.password,
     getData.designation,
     getData.level,
     getData.department,
     getData.status,
+    getData.password,
   ]
 );
   return Response.json({ success: true, message: "User added successfully!", userData: sentData });
 }
 
 export async function GET(req: Request) {
-    const result = await pool.query("SELECT * FROM usersData")
+    const result = await pool.query("SELECT * FROM team_members")
     return Response.json({success: true, message: "GET data Form DataBase", getData: result})
 }
 
@@ -40,7 +40,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     const deleteRecord = await pool.query(
-      "DELETE FROM usersData WHERE id = $1",
+      "DELETE FROM team_members WHERE id = $1",
       [id]
     );
 
@@ -71,7 +71,7 @@ export async function PUT(req: Request) {
     }
 
     await pool.query(
-      `UPDATE usersData 
+      `UPDATE team_members 
        SET name = $1, 
            email = $2, 
            designation = $3, 

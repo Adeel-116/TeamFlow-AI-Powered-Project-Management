@@ -19,9 +19,10 @@ import { userMemberStore } from "@/lib/memberStore"
 import { SuccessDialog } from "@/components/dashboard-components/SuccessDialog"
 import { useRouter } from "next/navigation"
 
-const levels = ["junior", "mid", "senior", "lead", "principal"]
-const departments = ["Engineering", "Design", "Product", "Marketing", "Sales", "HR"]
-const statuses = ["active", "inactive"]
+const levels = ["senior", "mid", "junior", "intern"]
+const departments = ["Development", "Design"]
+const designation = ["Frontend Developer", "Backend Developer", "Mobile App Developer", "UI/UX Designer", "Graphic Designer"]
+const status = ["active", "inactive"]
 
 export default function EditMemberModal() {
     const router = useRouter()
@@ -40,7 +41,7 @@ export default function EditMemberModal() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
 
-  // Load selected member data into form
+  
   useEffect(() => {
     if (selectedMember) {
       setFormData({
@@ -71,7 +72,7 @@ export default function EditMemberModal() {
         setShowSuccess(false)
         router.back()
         }, 1500)
-        setRefresh();
+        setRefresh()
       } else {
         alert(data.message || "Failed to update member.")
       }
@@ -132,15 +133,27 @@ export default function EditMemberModal() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="designation">Designation</Label>
-            <Input
-              id="designation"
-              value={formData.designation}
-              onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-            />
-          </div>
 
+              <div className="space-y-2">
+            <Label htmlFor="level">Designation</Label>
+            <Select
+              value={formData.designation}
+              onValueChange={(value) => setFormData({ ...formData, designation: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select level" />
+              </SelectTrigger>
+              <SelectContent>
+                {designation.map((designation) => (
+                  <SelectItem key={designation} value={designation}>
+                    {designation.charAt(0).toUpperCase() + designation.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div> 
+
+          
           <div className="space-y-2">
             <Label htmlFor="level">Level</Label>
             <Select
@@ -189,7 +202,7 @@ export default function EditMemberModal() {
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
-                {statuses.map((status) => (
+                {status.map((status) => (
                   <SelectItem key={status} value={status}>
                     {status.charAt(0).toUpperCase() + status.slice(1)}
                   </SelectItem>

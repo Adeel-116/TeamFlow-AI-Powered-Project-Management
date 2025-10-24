@@ -103,7 +103,6 @@ export default function ManageMembersPage() {
                       "ID",
                       "Name",
                       "Email",
-                      "Role",
                       "Designation",
                       "Level",
                       "Department",
@@ -122,7 +121,7 @@ export default function ManageMembersPage() {
                 </thead>
 
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {/* ✅ Loading State */}
+                
                   {loading ? (
                     <tr>
                       <td
@@ -159,15 +158,12 @@ export default function ManageMembersPage() {
                           {member.email}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {member.role}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
                           {member.designation}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {member.level}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                         <td className="px-6 py-4 whitespace-nowrap">
                           {member.department}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

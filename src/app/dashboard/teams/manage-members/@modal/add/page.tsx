@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button"
 import { UserPlus, Loader2 } from "lucide-react"
 import { SuccessDialog } from "@/components/dashboard-components/SuccessDialog"
 import { userMemberStore } from "@/lib/memberStore"
-const roles = ["admin", "manager", "member"]
+
+
 const levels = ["senior", "mid", "junior", "intern"]
-const departments = ["Development", "Design", "Marketing", "HR", "Sales"]
-const statuses = ["active", "inactive"]
+const departments = ["Development", "Design"]
+const designation = ["Frontend Developer", "Backend Developer", "Mobile App Developer", "UI/UX Designer", "Graphic Designer"]
+const status = ["active", "inactive"]
 
 export default function AddMemberModal() {
   const router = useRouter()
@@ -20,12 +22,11 @@ export default function AddMemberModal() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "",
-    role: "",
     designation: "",
     level: "",
     department: "",
     status: "",
+    password: "",
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -46,12 +47,11 @@ export default function AddMemberModal() {
         setFormData({
           name: "",
           email: "",
-          password: "",
-          role: "",
           designation: "",
           level: "",
           department: "",
           status: "",
+          password: "",
         })
         setRefresh()
       } else {
@@ -122,32 +122,22 @@ export default function AddMemberModal() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
+              <Label htmlFor="designation">Designation</Label>
               <Select
-                value={formData.role}
-                onValueChange={(value) => setFormData({ ...formData, role: value })}
+                value={formData.designation}
+                onValueChange={(value) => setFormData({ ...formData, designation: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a role" />
+                  <SelectValue placeholder="Select level" />
                 </SelectTrigger>
                 <SelectContent>
-                  {roles.map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                  {designation.map((designation) => (
+                    <SelectItem key={designation} value={designation}>
+                      {designation.charAt(0).toUpperCase() + designation.slice(1)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="designation">Designation</Label>
-              <Input
-                id="designation"
-                placeholder="e.g. Frontend Developer"
-                value={formData.designation}
-                onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-              />
             </div>
 
             <div className="space-y-2">
@@ -198,7 +188,7 @@ export default function AddMemberModal() {
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  {statuses.map((status) => (
+                  {status.map((status) => (
                     <SelectItem key={status} value={status}>
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </SelectItem>
