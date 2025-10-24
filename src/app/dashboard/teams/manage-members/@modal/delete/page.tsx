@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/alert-dialog"
 import { SuccessDialog } from "@/components/dashboard-components/SuccessDialog"
 import { motion, AnimatePresence } from "framer-motion"
+import { userMemberStore } from "@/lib/memberStore"
 
 export default function DeleteMemberModal() {
+  const {setRefresh} = userMemberStore()
   const router = useRouter()
   const searchParams = useSearchParams()
   const memberId = searchParams.get("id")
@@ -43,8 +45,9 @@ export default function DeleteMemberModal() {
       setShowSuccess(true)
       setTimeout(() => {
         setShowSuccess(false)
-        redirect("/dashboard/teams/manage-members")
-      }, 1500)
+        router.back()
+      }, 1000)
+      setRefresh()
     } catch (error) {
       console.error("Delete error:", error)
       alert(String(error) || "Something went wrong while deleting.")

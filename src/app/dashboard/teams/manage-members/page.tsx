@@ -1,48 +1,49 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect } from "react"
-import { Search, Plus, Edit, Trash2 } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { cn } from "@/lib/utils"
-import { userMemberStore } from "@/lib/memberStore"
+import React, { useState, useEffect } from "react";
+import { Search, Plus, Edit, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
+import { userMemberStore } from "@/lib/memberStore";
 
 type TeamMember = {
-  id: string
-  name: string
-  email: string
-  role: string
-  designation: string
-  level: string
-  department: string
-  status: string
-  created_at: string
-}
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  designation: string;
+  level: string;
+  department: string;
+  status: string;
+  created_at: string;
+};
 
 export default function ManageMembersPage() {
+  const { setSelectedMember, refresh } = userMemberStore();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const {setSelectedMember} = userMemberStore()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [team, setTeam] = useState<TeamMember[]>([])
+  const fetchData = async () => {
+    try {
+      const res = await fetch("/api/users");
+      const data = await res.json();
+      setTeam(data.getData.rows);
+    } catch (err) {
+      console.error("Error fetching members:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("/api/users")
-        const data = await res.json()
-        setTeam(data.getData.rows)
-      } catch (err) {
-        console.error("Error fetching members:", err)
-      }
-    }
-
-    fetchData()
-  }, [])
+    fetchData();
+  }, [refresh]);
 
   const getInitials = (name: string) =>
     name
@@ -50,14 +51,14 @@ export default function ManageMembersPage() {
       .map((n) => n[0])
       .join("")
       .toUpperCase()
-      .slice(0, 2)
+      .slice(0, 2);
 
   const filteredMembers = team.filter(
     (m) =>
       m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.role.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -86,8 +87,7 @@ export default function ManageMembersPage() {
 
               <Link href="/dashboard/teams/manage-members/add">
                 <Button className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Add Member
+                  <Plus className="h-4 w-4" /> Add Member
                 </Button>
               </Link>
             </div>
@@ -99,93 +99,117 @@ export default function ManageMembersPage() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Role
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Designation
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Level
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Department
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Created At
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    {[
+                      "ID",
+                      "Name",
+                      "Email",
+                      "Role",
+                      "Designation",
+                      "Level",
+                      "Department",
+                      "Status",
+                      "Created At",
+                      "Actions",
+                    ].map((header) => (
+                      <th
+                        key={header}
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        {header}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
 
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredMembers.map((member) => (
-                    <tr key={member.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">{member.id}</td>
-                      <td className="px-6 py-4 whitespace-nowrap flex items-center gap-3">
-                        <Avatar>
-                          <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
-                            {getInitials(member.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>{member.name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">{member.email}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{member.role}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {member.designation}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">{member.level}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{member.department}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge
-                          variant={member.status === "active" ? "default" : "secondary"}
-                          className={cn(
-                            "capitalize",
-                            member.status === "active" &&
-                              "bg-green-100 text-green-800 hover:bg-green-100"
-                          )}
-                        >
-                          {member.status}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {new Date(member.created_at).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right flex justify-end gap-2">
-                        <Link
-                          href={`/dashboard/teams/manage-members/edit?id=${member.id}`}
-                          onClick={() => setSelectedMember(member)}
-                        >
-                          <Button size="icon" variant="ghost">
-                            <Edit className="h-4 w-4 text-blue-600" />
-                          </Button>
-                        </Link>
-
-                        <Link
-                          href={`/dashboard/teams/manage-members/delete?id=${member.id}`}
-                        >
-                          <Button size="icon" variant="ghost">
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </Link>
+                  {/* ✅ Loading State */}
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan={10}
+                        className="text-center py-6 text-gray-500"
+                      >
+                        Loading members...
                       </td>
                     </tr>
-                  ))}
+                  ) : filteredMembers.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={10}
+                        className="text-center py-6 text-gray-400 italic"
+                      >
+                        No members found.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredMembers.map((member) => (
+                      <tr key={member.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {member.id}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap flex items-center gap-3">
+                          <Avatar>
+                            <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                              {getInitials(member.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>{member.name}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {member.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {member.role}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {member.designation}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {member.level}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {member.department}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Badge
+                            variant={
+                              member.status === "active"
+                                ? "default"
+                                : "secondary"
+                            }
+                            className={cn(
+                              "capitalize",
+                              member.status === "active" &&
+                                "bg-green-100 text-green-800 hover:bg-green-100"
+                            )}
+                          >
+                            {member.status}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {new Date(member.created_at).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right flex justify-end gap-2">
+                          <Link
+                            href={`/dashboard/teams/manage-members/edit?id=${member.id}`}
+                            onClick={() => setSelectedMember(member)}
+                          >
+                            <Button size="icon" variant="ghost">
+                              <Edit className="h-4 w-4 text-blue-600" />
+                            </Button>
+                          </Link>
+
+                          <Link
+                            href={`/dashboard/teams/manage-members/delete?id=${member.id}`}
+                          >
+                            <Button size="icon" variant="ghost">
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -193,5 +217,5 @@ export default function ManageMembersPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

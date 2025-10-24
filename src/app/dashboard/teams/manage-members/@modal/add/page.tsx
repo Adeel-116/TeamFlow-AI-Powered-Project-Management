@@ -8,7 +8,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { UserPlus, Loader2 } from "lucide-react"
 import { SuccessDialog } from "@/components/dashboard-components/SuccessDialog"
-
+import { userMemberStore } from "@/lib/memberStore"
 const roles = ["admin", "manager", "member"]
 const levels = ["senior", "mid", "junior", "intern"]
 const departments = ["Development", "Design", "Marketing", "HR", "Sales"]
@@ -16,7 +16,7 @@ const statuses = ["active", "inactive"]
 
 export default function AddMemberModal() {
   const router = useRouter()
-
+  const {setRefresh} = userMemberStore()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -53,6 +53,7 @@ export default function AddMemberModal() {
           department: "",
           status: "",
         })
+        setRefresh()
       } else {
         alert(data.message || "Failed to add member.")
       }

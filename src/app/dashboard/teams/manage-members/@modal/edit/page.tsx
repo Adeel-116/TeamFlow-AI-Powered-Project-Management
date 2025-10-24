@@ -25,7 +25,7 @@ const statuses = ["active", "inactive"]
 
 export default function EditMemberModal() {
     const router = useRouter()
-  const { selectedMember } = userMemberStore()
+  const { selectedMember, setRefresh } = userMemberStore()
 
   const [formData, setFormData] = useState({
     id: "",
@@ -71,6 +71,7 @@ export default function EditMemberModal() {
         setShowSuccess(false)
         router.back()
         }, 1500)
+        setRefresh();
       } else {
         alert(data.message || "Failed to update member.")
       }

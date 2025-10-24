@@ -4,7 +4,6 @@ type Member = {
   id: string
   name: string
   email: string
-  role: string
   designation: string
   level: string
   department: string
@@ -13,13 +12,17 @@ type Member = {
 
 type MemberStore = {
     selectedMember: Member | null,
-    setSelectedMember: (member: Member | null) => void
+    setSelectedMember: (member: Member | null) => void,
+    refresh: boolean, 
+    setRefresh: ()=> void
 }
 
 
 export const userMemberStore = create<MemberStore>((set)=>(
     {
         selectedMember: null,
-        setSelectedMember: (member) => set({ selectedMember: member })
+        setSelectedMember: (member) => set({ selectedMember: member }),
+        refresh: false,
+        setRefresh: ()=>set((state)=>({refresh: !state.refresh}))
     }
 ))
