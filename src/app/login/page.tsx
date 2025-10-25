@@ -11,8 +11,10 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [successor, setSuccessor] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
+        setLoading(true);
         e.preventDefault();
         try {
             const apiRequest = await fetch("/api/login", {
@@ -26,22 +28,30 @@ export default function LoginPage() {
                 }),
             });
 
-            const response = apiRequest.json()
+            const response = await apiRequest.json();
             if (apiRequest.ok) {
-
-                console.log("Login success:", response);
+                const userData = {
+                    _id: response.user.id,
+                    email: response.user.email, 
+                    role: response.user.role,
+                }
+                localStorage.setItem("userData", JSON.stringify(userData));
+                setLoading(false);
+                alert("Login Successful");
                 router.push("/dashboard");
             } else {
-                alert("Login failed");
+                alert(response.message);
+                setLoading(false);
             }
-
         } catch (error) {
             alert("Error Occur")
+                setLoading(false);
         }
 
     }
 
     return (
+        <>
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
             <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-8 w-full max-w-md">
                 <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
@@ -110,5 +120,8 @@ export default function LoginPage() {
                 </p>
             </div>
         </div>
+
+
+        </>
     );
 }

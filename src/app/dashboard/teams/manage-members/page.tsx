@@ -41,9 +41,25 @@ export default function ManageMembersPage() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [refresh]);
+  // useEffect(() => {
+  //   fetchData();
+  // }, [refresh]);
+
+useEffect(() => {
+    console.log("useEffect running"); // ✅ Check if useEffect runs
+
+    const localStorageData = localStorage.getItem("userData");
+    console.log("localStorageData:", localStorageData);
+
+    if (!localStorageData) {
+      console.log("No user data found, redirecting...");
+      // window.location.href = "/login"; // comment out for testing
+    } else {
+      console.log("User data found:", localStorageData);
+    }
+  }, []);
+
+
 
   const getInitials = (name: string) =>
     name
@@ -121,7 +137,7 @@ export default function ManageMembersPage() {
                 </thead>
 
                 <tbody className="bg-white divide-y divide-gray-200">
-                
+
                   {loading ? (
                     <tr>
                       <td
@@ -163,7 +179,7 @@ export default function ManageMembersPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           {member.level}
                         </td>
-                         <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap">
                           {member.department}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -176,7 +192,7 @@ export default function ManageMembersPage() {
                             className={cn(
                               "capitalize",
                               member.status === "active" &&
-                                "bg-green-100 text-green-800 hover:bg-green-100"
+                              "bg-green-100 text-green-800 hover:bg-green-100"
                             )}
                           >
                             {member.status}
