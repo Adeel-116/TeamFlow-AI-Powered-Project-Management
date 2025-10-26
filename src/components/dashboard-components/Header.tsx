@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useAuthStore } from "@/lib/useAuthStore";
 
 interface HeaderProps {
   isSidebarOpen: boolean;
@@ -31,6 +32,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }) => {
+
+  const {user} = useAuthStore();
   const [currentUser] = useState({
     name: "John Doe",
     email: "john.doe@teamflow.ai",
@@ -124,8 +127,8 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }) => {
                 </Avatar>
                 {/* Hide user info on small screens */}
                 <div className="hidden md:block text-left">
-                  <div className="text-sm font-medium">{currentUser.name}</div>
-                  <div className="text-xs text-gray-500">{currentUser.role}</div>
+                  <div className="text-sm font-medium">{user?.name}</div>
+                  <div className="text-xs text-gray-500">{user?.role}</div>
                 </div>
                 <ChevronDown className="w-4 h-4 hidden md:block" />
               </Button>
@@ -169,7 +172,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }) => {
                 </>
               )}
               <DropdownMenuItem className="text-red-600">
-                <LogOut className="w-4 h-4 mr-2" />
+                <LogOut className="w-4 h-4 mr-2"/>
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>

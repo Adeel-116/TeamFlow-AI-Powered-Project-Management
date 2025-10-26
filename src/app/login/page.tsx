@@ -1,44 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, LogIn } from "lucide-react";
+import { useAuthStore } from "@/lib/useAuthStore";
 
 export default function LoginPage() {
     const router = useRouter();
-
+    const setUser = useAuthStore((state)=>state.setUser)
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [successor, setSuccessor] = useState(false);
+    // const [successor, setSuccessor] = useState(false);
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         setLoading(true);
         e.preventDefault();
         try {
-            const apiRequest = await fetch("/api/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email,
-                    password,
-                }),
-            });
+           const apiRequest = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", 
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
             const response = await apiRequest.json();
             if (apiRequest.ok) {
-                const userData = {
-                    _id: response.user.id,
-                    email: response.user.email, 
-                    role: response.user.role,
-                }
-                localStorage.setItem("userData", JSON.stringify(userData));
+                setUser(response.user)
+                console.log("Login SuccessFully", response)
                 setLoading(false);
                 alert("Login Successful");
                 router.push("/dashboard");
+                router.refresh()
             } else {
                 alert(response.message);
                 setLoading(false);

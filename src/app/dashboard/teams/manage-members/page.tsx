@@ -41,23 +41,9 @@ export default function ManageMembersPage() {
     }
   };
 
-  // useEffect(() => {
-  //   fetchData();
-  // }, [refresh]);
-
-useEffect(() => {
-    console.log("useEffect running"); // ✅ Check if useEffect runs
-
-    const localStorageData = localStorage.getItem("userData");
-    console.log("localStorageData:", localStorageData);
-
-    if (!localStorageData) {
-      console.log("No user data found, redirecting...");
-      // window.location.href = "/login"; // comment out for testing
-    } else {
-      console.log("User data found:", localStorageData);
-    }
-  }, []);
+  useEffect(() => {
+    fetchData();
+  }, [refresh]);
 
 
 
