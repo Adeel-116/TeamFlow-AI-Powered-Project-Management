@@ -22,7 +22,7 @@ export default function NotFound() {
         </p>
 
         <Link
-          href="/login"
+          href="/"
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white font-medium hover:bg-blue-700 transition-colors duration-200"
         >
           <Home className="h-4 w-4" />
