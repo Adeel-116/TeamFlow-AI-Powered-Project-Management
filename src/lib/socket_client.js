@@ -67,21 +67,29 @@
 
 
 // lib/socket.ts
+// 
+
+
+
+
+// lib/socket_client.js
 import io from 'socket.io-client';
-import { Socket } from 'socket.io-client';
 
-let socket: Socket | null = null;
+let socket = null;
 
-export const initializeSocket = (token: string) => {
+export const initializeSocket = (token) => {
   if (socket && socket.connected) {
     return socket;
   }
 
-  socket = io('http://localhost:3001', { // Changed to port 3001 to match server
+  socket = io('http://localhost:3000', {
     auth: {
       token,
     },
     autoConnect: true,
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionAttempts: 5,
   });
 
   socket.on('connect', () => {
@@ -99,7 +107,7 @@ export const initializeSocket = (token: string) => {
   return socket;
 };
 
-export const getSocket = (): Socket => {
+export const getSocket = () => {
   if (!socket) {
     throw new Error('Socket not initialized. Call initializeSocket first.');
   }
@@ -114,26 +122,22 @@ export const disconnectSocket = () => {
 };
 
 // Helper functions for socket operations
-export const sendMessage = (data: {
-  conversationId: string;
-  recipientId: string;
-  content: string;
-}) => {
+export const sendMessage = (data) => {
   const socketInstance = getSocket();
   socketInstance.emit('send_message', data);
 };
 
-export const startTyping = (recipientId: string, conversationId: string) => {
+export const startTyping = (recipientId, conversationId) => {
   const socketInstance = getSocket();
   socketInstance.emit('typing_start', { recipientId, conversationId });
 };
 
-export const stopTyping = (recipientId: string, conversationId: string) => {
+export const stopTyping = (recipientId, conversationId) => {
   const socketInstance = getSocket();
   socketInstance.emit('typing_stop', { recipientId, conversationId });
 };
 
-export const markMessagesAsRead = (conversationId: string, messageIds: string[]) => {
+export const markMessagesAsRead = (conversationId, messageIds) => {
   const socketInstance = getSocket();
   socketInstance.emit('mark_read', { conversationId, messageIds });
 };
