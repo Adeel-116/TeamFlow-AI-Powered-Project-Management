@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
+// import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   Send,
   Search,
@@ -13,8 +14,11 @@ import {
   Phone,
   Video,
   CheckCheck,
-  Check
+  Check,
+  Wifi,
+  WifiOff
 } from 'lucide-react'
+import { initializeSocket, getSocket, disconnectSocket, sendMessage, startTyping, stopTyping } from '@/lib/socket_client'
 
 // Types
 interface User {
@@ -31,6 +35,7 @@ interface Message {
   content: string
   timestamp: Date
   isRead: boolean
+  status?: 'sending' | 'delivered' | 'failed'
 }
 
 export default function DirectMessagesPage() {
@@ -40,8 +45,95 @@ export default function DirectMessagesPage() {
   const [inputValue, setInputValue] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [isSocketConnected, setIsSocketConnected] = useState(false)
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
+  const [conversationId, setConversationId] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const currentUserId = '1' // Replace with actual user ID from your auth store
+  const typingTimeoutRef = useRef<NodeJS.Timeout>()
+  
+  // Replace with actual user ID from your auth store
+  const currentUserId = '1'
+  // Replace with actual JWT token from your auth store
+  const jwtToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkX2lkIjoiMGMzODYyOGUtMTBhYi00NzNkLWFiMTctMzI0NTk2YTQ1MzQ2IiwibmFtZSI6Ik11aGFtbWFkIEFkZWVsIiwiZW1haWwiOiJtYW5hZ2VyQGRpZ2l2ZXhzb2x1dGlvbi5jb20iLCJyb2xlIjoibWFuYWdlciIsImlhdCI6MTc2MTU3MDYxNSwiZXhwIjoxNzYxNTc0MjE1fQ.KXzH6WLrav060W7Fp2uLYABjiWDZvo8Mf7McETDXsSc'
+
+  // Initialize socket connection
+  useEffect(() => {
+    try {
+      const socket = initializeSocket(jwtToken)
+      setIsSocketConnected(socket.connected)
+
+      // Socket event listeners
+      socket.on('connect', () => {
+        console.log('✅ Connected to socket server')
+        setIsSocketConnected(true)
+      })
+
+      socket.on('disconnect', () => {
+        console.log('❌ Disconnected from socket server')
+        setIsSocketConnected(false)
+      })
+
+      socket.on('user_status', (data: { userId: string; isOnline: boolean }) => {
+        console.log('👤 User status update:', data)
+        setUsers(prev => 
+          prev.map(user => 
+            user.uuid_id === data.userId 
+              ? { ...user, isOnline: data.isOnline }
+              : user
+          )
+        )
+      })
+
+      socket.on('receive_message', (messageData: any) => {
+        console.log('📨 Received message:', messageData)
+        const newMessage: Message = {
+          id: messageData.id,
+          senderId: messageData.senderId,
+          content: messageData.content,
+          timestamp: new Date(messageData.timestamp),
+          isRead: messageData.isRead,
+          status: 'delivered'
+        }
+        setMessages(prev => [...prev, newMessage])
+      })
+
+      socket.on('message_sent', (data: any) => {
+        console.log('✅ Message sent confirmation:', data)
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === data.id 
+              ? { ...msg, status: data.status }
+              : msg
+          )
+        )
+      })
+
+      socket.on('message_error', (data: any) => {
+        console.error('❌ Message error:', data)
+      })
+
+      socket.on('user_typing', (data: { userId: string; conversationId: string; isTyping: boolean }) => {
+        console.log('⌨️ Typing indicator:', data)
+        if (data.conversationId === conversationId) {
+          setTypingUsers(prev => {
+            const updated = new Set(prev)
+            if (data.isTyping) {
+              updated.add(data.userId)
+            } else {
+              updated.delete(data.userId)
+            }
+            return updated
+          })
+        }
+      })
+
+      return () => {
+        disconnectSocket()
+      }
+    } catch (error) {
+      console.error('Failed to initialize socket:', error)
+    }
+  }, [jwtToken])
 
   // Fetch users from API on mount
   useEffect(() => {
@@ -77,46 +169,83 @@ export default function DirectMessagesPage() {
 
   const handleUserClick = async (user: User) => {
     setSelectedUser(user)
-    // Here you can fetch messages for this specific user/conversation
-    // For now, we'll clear messages when switching users
     setMessages([])
+    // Generate a simple conversation ID (you should get this from your API)
+    const convId = `conv_${currentUserId}_${user.uuid_id}`
+    setConversationId(convId)
     
-    // TODO: Fetch messages for this conversation from your API
-    // const response = await fetch(`/api/messages/${user.uuid_id}`)
-    // const data = await response.json()
-    // setMessages(data.messages)
+    console.log(`💬 Selected user: ${user.name}, conversation: ${convId}`)
   }
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || !selectedUser) return
+    if (!inputValue.trim() || !selectedUser || !isSocketConnected) return
 
+    const messageId = `msg_${Date.now()}`
     const newMessage: Message = {
-      id: Date.now().toString(),
+      id: messageId,
       senderId: currentUserId,
       content: inputValue,
       timestamp: new Date(),
-      isRead: false
+      isRead: false,
+      status: 'sending'
     }
 
     // Optimistically add message to UI
     setMessages([...messages, newMessage])
     setInputValue('')
 
-    // TODO: Send message to your API
-    // try {
-    //   const response = await fetch('/api/messages', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     credentials: 'include',
-    //     body: JSON.stringify({
-    //       recipientId: selectedUser.uuid_id,
-    //       content: inputValue
-    //     })
-    //   })
-    //   if (!response.ok) throw new Error('Failed to send message')
-    // } catch (error) {
-    //   console.error('Error sending message:', error)
-    // }
+    // Stop typing indicator
+    try {
+      stopTyping(selectedUser.uuid_id, conversationId)
+    } catch (error) {
+      console.error('Error stopping typing:', error)
+    }
+
+    // Send via socket
+    try {
+      sendMessage({
+        conversationId,
+        recipientId: selectedUser.uuid_id,
+        content: newMessage.content
+      })
+      console.log('📤 Message sent via socket:', newMessage.content)
+    } catch (error) {
+      console.error('Error sending message:', error)
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === messageId 
+            ? { ...msg, status: 'failed' }
+            : msg
+        )
+      )
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value)
+
+    if (!selectedUser || !isSocketConnected) return
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current)
+    }
+
+    // Start typing
+    try {
+      startTyping(selectedUser.uuid_id, conversationId)
+    } catch (error) {
+      console.error('Error starting typing:', error)
+    }
+
+    // Stop typing after 2 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      try {
+        stopTyping(selectedUser.uuid_id, conversationId)
+      } catch (error) {
+        console.error('Error stopping typing:', error)
+      }
+    }, 2000)
   }
 
   const getInitials = (name: string) => {
@@ -156,7 +285,22 @@ export default function DirectMessagesPage() {
       <div className="w-96 border-r border-gray-200 bg-white flex flex-col shadow-sm">
         {/* Header */}
         <div className="p-5 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Messages</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">Messages</h2>
+            <div className="flex items-center gap-2">
+              {isSocketConnected ? (
+                <div className="flex items-center gap-1 text-green-600">
+                  <Wifi className="w-4 h-4" />
+                  <span className="text-xs font-medium">Connected</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 text-red-600">
+                  <WifiOff className="w-4 h-4" />
+                  <span className="text-xs font-medium">Disconnected</span>
+                </div>
+              )}
+            </div>
+          </div>
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <Input
@@ -260,6 +404,16 @@ export default function DirectMessagesPage() {
               </div>
             </div>
 
+            {/* Connection Alert */}
+            {/* {!isSocketConnected && (
+              <Alert className="m-4 border-orange-200 bg-orange-50">
+                <WifiOff className="h-4 w-4 text-orange-600" />
+                <AlertDescription className="text-orange-800">
+                  Connection lost. Trying to reconnect...
+                </AlertDescription>
+              </Alert>
+            )} */}
+
             {/* Messages Area */}
             <ScrollArea className="flex-1 px-6 py-6 bg-gradient-to-b from-gray-50 to-white">
               <div className="space-y-4 max-w-4xl mx-auto">
@@ -324,7 +478,11 @@ export default function DirectMessagesPage() {
                                   {formatTime(message.timestamp)}
                                 </span>
                                 {isOwn && (
-                                  message.isRead ? (
+                                  message.status === 'sending' ? (
+                                    <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                                  ) : message.status === 'failed' ? (
+                                    <span className="text-xs text-red-500">Failed</span>
+                                  ) : message.isRead ? (
                                     <CheckCheck className="w-4 h-4 text-blue-500" />
                                   ) : (
                                     <Check className="w-4 h-4 text-gray-400" />
@@ -338,6 +496,30 @@ export default function DirectMessagesPage() {
                     })}
                   </AnimatePresence>
                 )}
+
+                {/* Typing Indicator */}
+                {typingUsers.size > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="flex items-center gap-2"
+                  >
+                    <Avatar className="w-8 h-8 flex-shrink-0">
+                      <AvatarFallback className="bg-gradient-to-br from-gray-300 to-gray-400 text-white text-xs">
+                        {getInitials(selectedUser.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="bg-gray-100 rounded-2xl px-4 py-3">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
                 <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
@@ -348,14 +530,15 @@ export default function DirectMessagesPage() {
                 <Input
                   placeholder="Type a message..."
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                  className="flex-1 rounded-full bg-gray-100 border-0 px-5 h-12 focus:bg-gray-50 transition-colors"
+                  disabled={!isSocketConnected}
+                  className="flex-1 rounded-full bg-gray-100 border-0 px-5 h-12 focus:bg-gray-50 transition-colors disabled:opacity-50"
                 />
 
                 <Button
                   onClick={handleSendMessage}
-                  disabled={!inputValue.trim()}
+                  disabled={!inputValue.trim() || !isSocketConnected}
                   size="icon"
                   className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white flex-shrink-0 rounded-full w-12 h-12 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
