@@ -1,36 +1,39 @@
 import { pool } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request:Request ) {
-    
-    const getData = await request.json()
-    console.log(getData)
+export async function POST(request: Request) {
 
-    const sentData = await pool.query(
-  `INSERT INTO team_members (name, email, designation, level, department, status, password)
+  const getData = await request.json()
+  console.log(getData)
+
+  const sentData = await pool.query(
+    `INSERT INTO team_members (name, email, designation, level, department, status, password)
    VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-  [
-    getData.name,
-    getData.email,
-    getData.designation,
-    getData.level,
-    getData.department,
-    getData.status,
-    getData.password,
-  ]
-);
+    [
+      getData.name,
+      getData.email,
+      getData.designation,
+      getData.level,
+      getData.department,
+      getData.status,
+      getData.password,
+    ]
+  );
   return Response.json({ success: true, message: "User added successfully!", userData: sentData });
 }
 
 export async function GET(req: Request) {
-    const result = await pool.query("SELECT * FROM team_members")
-    return Response.json({success: true, message: "GET data Form DataBase", getData: result})
+  const result = await pool.query("SELECT * FROM team_members")
+  return Response.json({ success: true, message: "GET data Form DataBase", getData: result })
 }
 
 export async function DELETE(req: NextRequest) {
   try {
     const url = new URL(req.url);
-    const id = url.searchParams.get("id");
+    console.log(url)
+    const id = url.searchParams.get("id")?.trim();
+
+    console.log(id)
 
     if (!id) {
       return new Response(
@@ -40,7 +43,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     const deleteRecord = await pool.query(
-      "DELETE FROM team_members WHERE id = $1",
+      "DELETE FROM team_members WHERE uuid_id = $1",
       [id]
     );
 
@@ -63,7 +66,7 @@ export async function DELETE(req: NextRequest) {
 
 export async function PUT(req: Request) {
   try {
-     const body = await req.json();
+    const body = await req.json();
     console.log(body)
 
     if (!body.id || !body.name || !body.email) {
@@ -78,7 +81,7 @@ export async function PUT(req: Request) {
            level = $4, 
            department = $5, 
            status = $6 
-       WHERE ID = $7`,
+       WHERE uuid_id = $7`,
       [body.name, body.email, body.designation, body.level, body.department, body.status, body.id]
     );
 

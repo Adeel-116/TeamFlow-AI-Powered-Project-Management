@@ -16,7 +16,8 @@ export interface NavItem {
   label: string;
   icon: LucideIcon;
   path?: string;
-  items: { id: string; label: string; path: string }[];
+  roles?: ("team_member" | "manager")[];
+  items: { id: string; label: string; path: string, roles: ("team_member" | "manager")[]}[];
 }
 
 export interface dummyProjectsType {
@@ -64,87 +65,84 @@ export interface Project {
   milestones: Milestone[];
 }
 
-// Navigation
+
 export const navigation: NavItem[] = [
   {
     id: "dashboard",
     label: "Dashboard",
     icon: Home,
     path: "/dashboard",
+    roles: ["manager", "team_member"], // Both roles
     items: [],
   },
   {
     id: "projects",
     label: "Project Management",
     icon: FolderOpen,
+    roles: ["manager"], // Manager only
     items: [
-      { id: "all-projects", label: "All Projects", path: "/dashboard/projects" },
-      { id: "create-project", label: "Create Project", path: "/dashboard/projects/create" },
-      { id: "milestones", label: "Milestones", path: "/dashboard/projects/milestones" },
-      { id: "task-overview", label: "Task Overview", path: "/dashboard/projects/tasks" },
+      { id: "all-projects", label: "All Projects", path: "/dashboard/projects", roles: ["manager"] },
+      { id: "create-project", label: "Create Project", path: "/dashboard/projects/create", roles: ["manager"] },
+      { id: "milestones", label: "Milestones", path: "/dashboard/projects/milestones", roles: ["manager"] },
+      { id: "task-overview", label: "Task Overview", path: "/dashboard/projects/tasks", roles: ["manager"] },
     ],
   },
-  // {
-  //   id: "tasks",
-  //   label: "Task Management",
-  //   icon: CheckSquare,
-  //   items: [
-  //     { id: "my-tasks", label: "My Tasks", path: "/dashboard/tasks/my-tasks" },
-  //     { id: "subtasks", label: "Subtasks", path: "/dashboard/tasks/subtasks" },
-  //     { id: "time-tracking", label: "Time Tracking", path: "/dashboard/tasks/time-tracking" },
-  //     { id: "labels-tags", label: "Labels / Tags", path: "/dashboard/tasks/labels-tags" },
-  //   ],
-  // },
   {
     id: "files",
     label: "File Management",
     icon: FileText,
+    roles: ["manager", "team_member"], // Both roles
     items: [
-      { id: "documents", label: "Documents", path: "/dashboard/files/documents" },
-      { id: "uploads", label: "Uploads", path: "/dashboard/files/uploads" },
-      { id: "version-control", label: "Version Control", path: "/dashboard/files/version-control" },
-      { id: "file-search", label: "File Search", path: "/dashboard/files/search" },
+      { id: "documents", label: "Documents", path: "/dashboard/files/documents", roles: ["manager", "team_member"] },
+      { id: "uploads", label: "Uploads", path: "/dashboard/files/uploads", roles: ["manager", "team_member"] },
+      { id: "version-control", label: "Version Control", path: "/dashboard/files/version-control", roles: ["manager"] },
+      { id: "file-search", label: "File Search", path: "/dashboard/files/search", roles: ["manager", "team_member"] },
     ],
   },
   {
     id: "calendar",
     label: "Calendar",
     icon: Calendar,
+    roles: ["manager", "team_member"], // Both roles
     items: [
-      { id: "calendar-view", label: "Calendar View", path: "/dashboard/calendar" },
-      { id: "meetings", label: "Meetings", path: "/dashboard/calendar/meetings" },
-      { id: "deadlines", label: "Deadlines", path: "/dashboard/calendar/deadlines" },
+      { id: "calendar-view", label: "Calendar View", path: "/dashboard/calendar", roles: ["manager", "team_member"] },
+      { id: "meetings", label: "Meetings", path: "/dashboard/calendar/meetings", roles: ["manager", "team_member"] },
+      { id: "deadlines", label: "Deadlines", path: "/dashboard/calendar/deadlines", roles: ["manager", "team_member"] },
     ],
   },
   {
     id: "reports",
     label: "Reports & Analytics",
     icon: BarChart3,
+    roles: ["manager"], // Manager only
     items: [
-      { id: "project-reports", label: "Project Reports", path: "/dashboard/reports/projects" },
-      { id: "team-performance", label: "Team Performance", path: "/dashboard/reports/team" },
-      { id: "custom-reports", label: "Custom Reports", path: "/dashboard/reports/custom" },
-      { id: "export", label: "Export", path: "/dashboard/reports/export" },
+      { id: "project-reports", label: "Project Reports", path: "/dashboard/reports/projects", roles: ["manager"] },
+      { id: "team-performance", label: "Team Performance", path: "/dashboard/reports/team", roles: ["manager"] },
+      { id: "custom-reports", label: "Custom Reports", path: "/dashboard/reports/custom", roles: ["manager"] },
+      { id: "export", label: "Export", path: "/dashboard/reports/export", roles: ["manager"] },
     ],
   },
   {
     id: "team-members",
     label: "Team Members",
     icon: Users,
+    roles: ["manager"], // Manager only
     items: [
-      { id: "add-member", label: "Manage Team Member", path: "/dashboard/teams/manage-members" },
+      { id: "add-member", label: "Manage Team Member", path: "/dashboard/teams/manage-members", roles: ["manager"] },
     ],
   },
   {
     id: "communication",
     label: "Communication",
-    icon: Clock, 
+    icon: Clock,
+    roles: ["manager", "team_member"], // Both roles
     items: [
-      { id: "channel", label: "Chat", path: "/dashboard/chats/channels&threads" },
-      { id: "direct-messages", label: "Direct Messages", path: "/dashboard/chats/dms" },
+      { id: "channel", label: "Chat", path: "/dashboard/chats/channels&threads", roles: ["manager", "team_member"] },
+      { id: "direct-messages", label: "Direct Messages", path: "/dashboard/chats/dms", roles: ["manager", "team_member"] },
     ],
   },
 ];
+
 
 export const dummyProjects: dummyProjectsType[] = [
   { id: 1, name: "Website Redesign", progress: 75, status: "In Progress", dueDate: "Oct 20, 2025" },

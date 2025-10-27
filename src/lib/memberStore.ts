@@ -17,7 +17,6 @@ type MemberStore = {
     setRefresh: ()=> void
 }
 
-
 export const userMemberStore = create<MemberStore>((set)=>(
     {
         selectedMember: null,

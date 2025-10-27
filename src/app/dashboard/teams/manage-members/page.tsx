@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { userMemberStore } from "@/lib/memberStore";
 
 type TeamMember = {
-  id: string;
+  uuid_id: string;
   name: string;
   email: string;
   role: string;
@@ -33,6 +33,7 @@ export default function ManageMembersPage() {
     try {
       const res = await fetch("/api/users");
       const data = await res.json();
+      console.log(data.getData.rows[0].uuid_id)
       setTeam(data.getData.rows);
     } catch (err) {
       console.error("Error fetching members:", err);
@@ -144,9 +145,9 @@ export default function ManageMembersPage() {
                     </tr>
                   ) : (
                     filteredMembers.map((member) => (
-                      <tr key={member.id} className="hover:bg-gray-50">
+                      <tr key={member.uuid_id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {member.id}
+                          {member.uuid_id.slice(0, 8)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap flex items-center gap-3">
                           <Avatar>
@@ -189,7 +190,7 @@ export default function ManageMembersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right flex justify-end gap-2">
                           <Link
-                            href={`/dashboard/teams/manage-members/edit?id=${member.id}`}
+                            href={`/dashboard/teams/manage-members/edit?id=${member.uuid_id}`}
                             onClick={() => setSelectedMember(member)}
                           >
                             <Button size="icon" variant="ghost">
@@ -198,7 +199,7 @@ export default function ManageMembersPage() {
                           </Link>
 
                           <Link
-                            href={`/dashboard/teams/manage-members/delete?id=${member.id}`}
+                            href={`/dashboard/teams/manage-members/delete?id=${member.uuid_id}`}
                           >
                             <Button size="icon" variant="ghost">
                               <Trash2 className="h-4 w-4 text-red-600" />

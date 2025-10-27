@@ -4,7 +4,7 @@ type User = {
   id: string;
   name: string;
   email: string;
-  role: "project_manager" | "team_member";
+  role: "manager" | "team_member";
 } | null;
 
 type AuthStore = {

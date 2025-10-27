@@ -21,7 +21,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log(data)
           setUser(data.user);
         } else {
           router.push("/login");

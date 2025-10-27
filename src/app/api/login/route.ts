@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     if (getData.password === user.password) {
       // Password correct, create JWT
       const newUserData = {
-        id: user.id,
+        uuid_id: user.uuid_id,
         name: user.name,
         email: user.email,
         role: user.role,
