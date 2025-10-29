@@ -1,12 +1,11 @@
-
-const {createServer} = require('http')
-const {Server} = require('socket.io')
+const { createServer } = require('http')
+const { Server } = require('socket.io')
 
 const PORT = 3001
-const httpServer  = createServer();
+const httpServer = createServer();
 
 const io = new Server(httpServer, {
-    cors:{
+    cors: {
         origin: 'http://localhost:3000',
         methods: ["GET", "POST"]
     }
@@ -14,39 +13,43 @@ const io = new Server(httpServer, {
 
 const connectedUser = new Map()
 
-io.on("connection", (socket)=>{
-    console.log("client connect", socket.id)
+io.on("connection", (socket) => {
 
-    socket.on("register", (userId)=>{
+    socket.on("register", (userId) => {
         connectedUser.set(userId, socket.id)
         console.log(`✅ User ${userId} registered as ${socket.id}`);
+        console.log(`📊 Total connected users: ${connectedUser.size}`);
     })
 
-    socket.on("send_message", (data)=>{
-        const {senderId, receiverId, message} = data
-        console.log("Private Data", data)
-        
-        const recieverSocketId = connectedUser.get(receiverId);
-        if(recieverSocketId){
-            io.to(recieverSocketId).emit("receive_message", data)
-        } 
-    } )
+    socket.on("send_message", (data) => {
+        const { senderId, receiverId, message } = data;
+        console.log("📤 Private Data:", data);
+        console.log("👥 Connected users:", Array.from(connectedUser.entries()));
 
-
-
-socket.on("disconnect", () => {
-    console.log("❌ Client disconnected:", socket.id);
-
-    for (const [id, sid] of connectedUser.entries()) {
-        if (sid === socket.id) {
-          connectedUser.delete(id);
-          break;
+        const receiverSocketID = connectedUser.get("0af8c6c8-d5f1-493b-a5d5-06ac4ad407ea");
+        if (receiverSocketID) {
+            io.to(receiverSocketID).emit("receive_message", data);
+            console.log("✅ Message sent to:", receiverSocketID);
+        } else {
+            console.log("⚠️ Receiver not connected:", receiverId);
         }
-      }
+    });
 
-  });
+    socket.on("disconnect", () => {
+        console.log("❌ Client disconnected:", socket.id);
+        
+        // IMPORTANT: Remove user from connected users
+        for (const [userId, socketId] of connectedUser.entries()) {
+            if (socketId === socket.id) {
+                connectedUser.delete(userId);
+                console.log(`🗑️ Removed user ${userId} from connected users`);
+                break;
+            }
+        }
+        console.log(`📊 Total connected users: ${connectedUser.size}`);
+    });
 })
 
 httpServer.listen(PORT, () => {
-  console.log(`🚀 Socket server running on port ${PORT}`);
+    console.log(`🚀 Socket server running on port ${PORT}`);
 });
