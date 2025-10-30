@@ -26,7 +26,7 @@ io.on("connection", (socket) => {
         console.log("📤 Private Data:", data);
         console.log("👥 Connected users:", Array.from(connectedUser.entries()));
 
-        const receiverSocketID = connectedUser.get("0af8c6c8-d5f1-493b-a5d5-06ac4ad407ea");
+        const receiverSocketID = connectedUser.get(receiverId);
         if (receiverSocketID) {
             io.to(receiverSocketID).emit("receive_message", data);
             console.log("✅ Message sent to:", receiverSocketID);
@@ -38,7 +38,6 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         console.log("❌ Client disconnected:", socket.id);
         
-        // IMPORTANT: Remove user from connected users
         for (const [userId, socketId] of connectedUser.entries()) {
             if (socketId === socket.id) {
                 connectedUser.delete(userId);
