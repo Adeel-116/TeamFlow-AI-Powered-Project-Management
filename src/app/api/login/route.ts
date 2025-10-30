@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
       );
 
       response.cookies.set("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        httpOnly: false,
+        secure: false,
         sameSite: "lax",
         path: "/",
         maxAge: 60 * 60 * 24 * 7, // 7 days
@@ -51,7 +51,6 @@ export async function POST(request: NextRequest) {
       console.log("✅ Cookie set successfully");
       return response;
     } else {
-      // Password incorrect
       return NextResponse.json({ message: "Incorrect password" }, { status: 401 });
     }
   } catch (error) {
