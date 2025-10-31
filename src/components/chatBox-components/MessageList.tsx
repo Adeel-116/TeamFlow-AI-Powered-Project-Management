@@ -8,6 +8,8 @@ interface Message {
   receiverId: string;
   message: string;
   timestamp: string;
+  messageId?: number;
+  isRead?: boolean;
 }
 
 interface MessageListProps {
@@ -70,6 +72,7 @@ export function MessageList({ messages, currentUserId, selectedUserName }: Messa
                   message={msg.message}
                   timestamp={msg.timestamp}
                   isOwn={isOwn}
+                  isRead={msg.isRead}
                   senderInitials={getInitials(isOwn ? "You" : selectedUserName)}
                 />
               </div>

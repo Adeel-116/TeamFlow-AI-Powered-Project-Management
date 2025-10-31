@@ -1,19 +1,26 @@
-"use client"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Check } from "lucide-react";
+"use client";
+
 import { motion } from "framer-motion";
+import { Check, CheckCheck } from "lucide-react";
 
 interface MessageBubbleProps {
   message: string;
   timestamp: string;
   isOwn: boolean;
+  isRead?: boolean;
   senderInitials: string;
 }
 
-export function MessageBubble({ message, timestamp, isOwn, senderInitials }: MessageBubbleProps) {
-  const formatTime = (date: string) => {
-    const messageDate = new Date(date);
-    return messageDate.toLocaleTimeString("en-US", {
+export function MessageBubble({
+  message,
+  timestamp,
+  isOwn,
+  isRead,
+  senderInitials,
+}: MessageBubbleProps) {
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
@@ -21,35 +28,47 @@ export function MessageBubble({ message, timestamp, isOwn, senderInitials }: Mes
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      className={`flex gap-3 ${isOwn ? "justify-end" : "justify-start"}`}
+    <div
+      className={`flex items-end gap-2 mb-3 ${
+        isOwn ? "justify-end" : "justify-start"
+      }`}
     >
+      {/* Avatar for received messages */}
       {!isOwn && (
-        <Avatar className="w-8 h-8 flex-shrink-0">
-          <AvatarFallback className="bg-gradient-to-br from-gray-300 to-gray-400 text-white text-xs">
-            {senderInitials}
-          </AvatarFallback>
-        </Avatar>
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-sm font-semibold text-gray-700">
+          {senderInitials}
+        </div>
       )}
 
-      <div className={`max-w-md ${isOwn ? "items-end" : "items-start"} flex flex-col gap-1`}>
-        <div
-          className={`px-4 py-3 rounded-2xl shadow-sm ${
-            isOwn
-              ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-sm"
-              : "bg-gray-100 text-gray-900 rounded-bl-sm border border-gray-200"
-          }`}
-        >
-          <p className="text-sm leading-relaxed break-words">{message}</p>
-        </div>
+      {/* Message container */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className={`max-w-xs rounded-2xl px-3 py-2 border shadow-sm ${
+          isOwn
+            ? "border-gray-200 bg-transparent text-gray-900"
+            : "border-gray-200 bg-transparent text-gray-900"
+        }`}
+      >
+        {/* Message Text */}
+        <p className="text-sm break-words">{message}</p>
 
-        <div className="flex items-center gap-1 px-2">
-          <span className="text-xs text-gray-400">{formatTime(timestamp)}</span>
-          {isOwn && <Check className="w-4 h-4 text-gray-400" />}
+        {/* Timestamp + Tick icons */}
+        <div className="mt-1 flex items-center justify-end gap-1 text-xs text-gray-500">
+          <span>{formatTime(timestamp)}</span>
+
+          {isOwn && (
+            <>
+              {isRead ? (
+                <CheckCheck className="w-4 h-4 text-blue-500" />
+              ) : (
+                <Check className="w-4 h-4 text-gray-400" />
+              )}
+            </>
+          )}
         </div>
-      </div>
-    </motion.div>
-)}
+      </motion.div>
+    </div>
+  );
+}

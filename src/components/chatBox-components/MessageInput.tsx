@@ -7,9 +7,10 @@ import { Send } from "lucide-react";
 interface MessageInputProps {
   onSend: (message: string) => void;
   disabled: boolean;
+  socket: any
 }
 
-export function MessageInput({ onSend, disabled }: MessageInputProps) {
+export function MessageInput({ onSend, disabled, socket}: MessageInputProps) {
   const [inputValue, setInputValue] = useState("");
 
   const handleSend = () => {
