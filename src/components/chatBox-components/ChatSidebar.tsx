@@ -23,7 +23,6 @@ export function ChatSidebar({
   selectedUserId, 
   onSelectUser, 
   isConnected,
-  currentUserId 
 }: ChatSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
