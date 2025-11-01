@@ -1,22 +1,28 @@
-// @/lib/chat_id.ts should look something like:
 import { create } from 'zustand';
 
-interface ChatIDState {
-  currentUserID: string | null;
-  selectedUserID: string | null;
-  setCurrentID: (id: string) => void;
-  setSelectedID: (id: string) => void;
+interface ChatUser {
+  uuid_id: string;
+  name: string;
+  email: string;
+  role: string;
 }
 
-export const useChatID = create<ChatIDState>((set) => ({
-  currentUserID: null,
-  selectedUserID: null,
-  setCurrentID: (id) => {
-    console.log("🎯 Zustand setCurrentID called:", id);
-    set({ currentUserID: id });
+interface ChatState {
+  currentUser: ChatUser | null;
+  selectedUser: ChatUser | null;
+  setCurrentUser: (user: ChatUser) => void;
+  setSelectedUser: (user: ChatUser) => void;
+}
+
+export const useChatStore = create<ChatState>((set) => ({
+  currentUser: null,
+  selectedUser: null,
+  setCurrentUser: (user) => {
+    console.log("🎯 Zustand setCurrentUser called:", user);
+    set({ currentUser: user });
   },
-  setSelectedID: (id) => {
-    console.log("🎯 Zustand setSelectedID called:", id);
-    set({ selectedUserID: id });
+  setSelectedUser: (user) => {
+    console.log("🎯 Zustand setSelectedUser called:", user);
+    set({ selectedUser: user });
   },
 }));
