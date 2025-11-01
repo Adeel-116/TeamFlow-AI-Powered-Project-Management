@@ -66,7 +66,8 @@ export default function ChatLayout({
     }
   }, [currentUser, setCurrentUser]);
 
-  useEffect(()=> {
+  // Socket connection
+  useEffect(() => {
     if (!currentUser?.uuid_id) return;
 
     const socket = io("http://localhost:3001", {
@@ -86,6 +87,18 @@ export default function ChatLayout({
       });
     });
 
+    // Listen for user status updates
+    socket.on("user_status", (data: { userId: string; status: boolean }[]) => {
+      console.log("User status update:", data);
+      setOnlineUsers((prev) => {
+        const updated = { ...prev };
+        data.forEach((user) => {
+          updated[user.userId] = user.status;
+        });
+        return updated;
+      });
+    });
+
     socket.on("disconnect", async () => {
       console.log("❌ Socket disconnected");
       setIsSocketConnected(false);
@@ -98,90 +111,85 @@ export default function ChatLayout({
           },
           body: JSON.stringify({ currentUserId: currentUser.uuid_id }),
         });
-        if (!response.ok) throw new Error("Failed to fetch user status");
+        if (!response.ok) throw new Error("Failed to update last seen");
       } catch (error) {
-        console.error("Error fetching user status:", error);
+        console.error("Error updating last seen:", error);
       }
+    });
 
-      socket.on("user_status", (data: { userId: string; status: boolean }[]) => {
-        console.log("User status update:", data);
-        setOnlineUsers((prev) => {
-          const updated = { ...prev };
-          data.forEach((user) => {
-            updated[user.userId] = user.status;
-          });
-          return updated;
-        });
-      });
+    // Cleanup
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [currentUser?.uuid_id]);
 
-      return () => {
-        socket.disconnect();
-        socketRef.current = null;
-      };
-    }, [currentUser?.uuid_id]);
-  })
-    useEffect(() => {
-      const fetchChatUsers = async () => {
-        try {
-          const res = await fetch("/api/chats-users");
-          const data = await res.json();
-          setChatUsers(data.users || []);
-          console.log("✅ Chat users loaded:", data.users?.length);
-        } catch (err) {
-          console.error("❌ Error fetching chat users:", err);
-        }
-      };
-
-      fetchChatUsers();
-    }, []);
-    
-    const handleUserSelect = async (user: ChatUser) => {
-      if (!currentUser) {
-        console.error("❌ Current user not available");
-        return;
-      }
-
-      console.log("👤 Selecting user:", user.name);
-
-      setSelectedUser({
-        uuid_id: user.uuid_id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      });
-
+  // Fetch chat users
+  useEffect(() => {
+    const fetchChatUsers = async () => {
       try {
-        const conversationRes = await fetch("/api/conversations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            senderId: currentUser.uuid_id,
-            receiverId: user.uuid_id,
-          }),
-        });
-
-        const conversationData = await conversationRes.json();
-
-        if (conversationData.conversationId) {
-          console.log("✅ Navigating to conversation:", conversationData.conversationId);
-          router.push(`/dashboard/chats/dms/${conversationData.conversationId}`);
-        }
-      } catch (error) {
-        console.error("❌ Error creating conversation:", error);
+        const res = await fetch("/api/chats-users");
+        const data = await res.json();
+        setChatUsers(data.users || []);
+        console.log("✅ Chat users loaded:", data.users?.length);
+      } catch (err) {
+        console.error("❌ Error fetching chat users:", err);
       }
     };
 
-    return (
-      <div className="flex h-[calc(100vh-133px)] w-full overflow-hidden bg-gray-50">
-        <ChatSidebar
-          users={chatUsers}
-          selectedUserId={selectedUser?.uuid_id || null}
-          onSelectUser={handleUserSelect}
-          isConnected={isSocketConnected}
-          onlineUsers={onlineUsers}
-        />
+    fetchChatUsers();
+  }, []);
 
-        <div className="flex-1 flex flex-col bg-white">{children}</div>
-      </div>
-    );
-  }
+  const handleUserSelect = async (user: ChatUser) => {
+    if (!currentUser) {
+      console.error("❌ Current user not available");
+      return;
+    }
+
+    console.log("👤 Selecting user:", user.name);
+
+    setSelectedUser({
+      uuid_id: user.uuid_id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
+
+    try {
+      const conversationRes = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderId: currentUser.uuid_id,
+          receiverId: user.uuid_id,
+        }),
+      });
+
+      const conversationData = await conversationRes.json();
+
+      if (conversationData.conversationId) {
+        console.log(
+          "✅ Navigating to conversation:",
+          conversationData.conversationId
+        );
+        router.push(`/dashboard/chats/dms/${conversationData.conversationId}`);
+      }
+    } catch (error) {
+      console.error("❌ Error creating conversation:", error);
+    }
+  };
+
+  return (
+    <div className="flex h-[calc(100vh-133px)] w-full overflow-hidden bg-gray-50">
+      <ChatSidebar
+        users={chatUsers}
+        selectedUserId={selectedUser?.uuid_id || null}
+        onSelectUser={handleUserSelect}
+        isConnected={isSocketConnected}
+        onlineUsers={onlineUsers}
+      />
+
+      <div className="flex-1 flex flex-col bg-white">{children}</div>
+    </div>
+  );
+}

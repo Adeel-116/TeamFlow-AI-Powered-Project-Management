@@ -4,9 +4,9 @@ import { pool } from "@/lib/db";
 
 export async function GET(
   request: Request,
-  { params }: { params: { conversationId: string } }
+  { params }: { params: Promise<{ conversationId: string }> }
 ) {
-  const { conversationId } = params;
+  const { conversationId } = await params;
 
   try {
     const result = await pool.query(
