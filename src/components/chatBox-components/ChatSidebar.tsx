@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Wifi, WifiOff } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { UserListItem } from "./UserListItem";
-
+import { useChatStore } from "@/lib/chatStore";
 interface ChatUser {
   uuid_id: string;
   name: string;
@@ -18,17 +18,16 @@ interface ChatSidebarProps {
   selectedUserId: string | null;
   onSelectUser: (user: ChatUser) => void;
   isConnected: boolean;
-  onlineUsers: Record<string, boolean>;
 }
 
 export function ChatSidebar({
   users,
   selectedUserId,
   onSelectUser,
-  isConnected,
-  onlineUsers,
+  isConnected
 }: ChatSidebarProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const {onlineUsers} = useChatStore()
 
   const filteredUsers = useMemo(() => {
     const usersWithStatus = users.map((user) => ({

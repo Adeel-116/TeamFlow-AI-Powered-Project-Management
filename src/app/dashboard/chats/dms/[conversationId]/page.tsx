@@ -90,12 +90,6 @@ export default function ChatPage() {
 
     socket.on("receive_message", (data: Message) => {
       setMessages((prev) => {
-        const isDuplicate = prev.some(
-          (msg) =>
-            msg.timestamp === data.timestamp && msg.senderId === data.senderId
-        );
-        if (isDuplicate) return prev;
-
         if (selectedUser && selectedUser.uuid_id === data.senderId) {
           socket.emit("messages_read", {
             senderId: data.senderId,
@@ -235,6 +229,7 @@ export default function ChatPage() {
     <>
       <ChatHeader
         userName={selectedUser.name}
+        userId = {selectedUser.uuid_id}
         userInitials={getInitials(selectedUser.name)}
       />
 

@@ -28,9 +28,8 @@ export default function ChatLayout({
 }) {
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<Record<string, boolean>>({});
   const router = useRouter();
-  const { currentUser, selectedUser, setCurrentUser, setSelectedUser } =
+  const { currentUser, selectedUser, setCurrentUser, setSelectedUser, setOnlineUsers } =
     useChatStore();
   const socketRef = useRef<Socket | null>(null);
 
@@ -89,32 +88,21 @@ export default function ChatLayout({
 
     // Listen for user status updates
     socket.on("user_status", (data: { userId: string; status: boolean }[]) => {
-      console.log("User status update:", data);
-      setOnlineUsers((prev) => {
-        const updated = { ...prev };
-        data.forEach((user) => {
-          updated[user.userId] = user.status;
-        });
-        return updated;
+      console.log("📡 User status update:", data);
+      
+      // Convert array to Record<string, boolean> and save to Zustand
+      const onlineUsersMap: Record<string, boolean> = {};
+      data.forEach((user) => {
+        onlineUsersMap[user.userId] = user.status;
       });
+      
+      console.log("💾 Saving to Zustand:", onlineUsersMap);
+      setOnlineUsers(onlineUsersMap);
     });
 
     socket.on("disconnect", async () => {
       console.log("❌ Socket disconnected");
       setIsSocketConnected(false);
-
-      try {
-        const response = await fetch("/api/last-seen", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ currentUserId: currentUser.uuid_id }),
-        });
-        if (!response.ok) throw new Error("Failed to update last seen");
-      } catch (error) {
-        console.error("Error updating last seen:", error);
-      }
     });
 
     // Cleanup
@@ -122,7 +110,7 @@ export default function ChatLayout({
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [currentUser?.uuid_id]);
+  }, [currentUser?.uuid_id, setOnlineUsers]);
 
   // Fetch chat users
   useEffect(() => {
@@ -186,7 +174,6 @@ export default function ChatLayout({
         selectedUserId={selectedUser?.uuid_id || null}
         onSelectUser={handleUserSelect}
         isConnected={isSocketConnected}
-        onlineUsers={onlineUsers}
       />
 
       <div className="flex-1 flex flex-col bg-white">{children}</div>
