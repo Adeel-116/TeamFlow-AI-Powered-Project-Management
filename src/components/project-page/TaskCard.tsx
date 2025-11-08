@@ -1,3 +1,4 @@
+"use client"
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'; // Update path
 import { Button } from '@/components/ui/button'; // Update path

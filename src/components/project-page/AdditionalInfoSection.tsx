@@ -1,10 +1,9 @@
+"use client"
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'; // Update path
 import { Label } from '@/components/ui/label'; // Update path
 import { Textarea } from '@/components/ui/textarea'; // Update path
 import { Briefcase, LinkIcon } from 'lucide-react'; // Icons from lucide-react
-
-
 
 export const AdditionalInfoSection = ({
   objectives, setObjectives,

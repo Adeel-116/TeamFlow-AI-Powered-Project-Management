@@ -1,28 +1,20 @@
+
+"use client"
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 
-interface Section {
-  id: number | string;
-  name: string;
-  icon: React.ElementType; // React component for the icon
-}
 
-interface SectionNavigationProps {
-  sections: Section[];
-  activeSection: number | string;
-  onSectionChange: (id: number | string) => void;
-}
-
-const SectionNavigation: React.FC<SectionNavigationProps> = ({
+const SectionNavigation= ({
   sections,
   activeSection,
   onSectionChange
-}) => {
+}:any) => {
   return (
     <Card className="border-slate-200 shadow-sm">
       <CardContent className="pt-6">
         <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
-          {sections.map((section) => {
+          {sections.map((section:any) => {
             const Icon = section.icon;
             return (
               <button
