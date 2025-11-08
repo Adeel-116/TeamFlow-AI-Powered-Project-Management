@@ -81,8 +81,8 @@ export const navigation: NavItem[] = [
     icon: FolderOpen,
     roles: ["manager"], // Manager only
     items: [
-      { id: "all-projects", label: "All Projects", path: "/dashboard/projects", roles: ["manager"] },
-      { id: "create-project", label: "Create Project", path: "/dashboard/projects/create", roles: ["manager"] },
+      { id: "all-projects", label: "All Projects", path: "/dashboard/projects/all-projects", roles: ["manager"] },
+      { id: "create-project", label: "Create Project", path: "/dashboard/projects/add-project", roles: ["manager"] },
       { id: "milestones", label: "Milestones", path: "/dashboard/projects/milestones", roles: ["manager"] },
       { id: "task-overview", label: "Task Overview", path: "/dashboard/projects/tasks", roles: ["manager"] },
     ],
