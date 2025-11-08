@@ -3,13 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import {
-  Settings,
-  HelpCircle,
-  LogOut,
-  ChevronDown,
-  X,
-} from 'lucide-react'
+import { Settings, HelpCircle, ChevronDown, X } from 'lucide-react'
 import TeamflowLogo from '../../../public/teamflow.png'
 import { navigation } from '../../data/Data'
 import { useAuthStore } from '@/lib/useAuthStore'
@@ -26,24 +20,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggleSidebar }) => {
   const [activePage, setActivePage] = useState('dashboard')
   const [expandedSections, setExpandedSections] = useState<string[]>([])
 
- 
   const role = user?.role as 'team_member' | 'manager' | undefined
   const nav = navigation
-    .filter(section => (role ? (section.roles?.includes(role) ?? false) : false))
+    .filter(section => (role ? section.roles?.includes(role) : false))
     .map(section => ({
       ...section,
-      items: section.items.filter(item => (role ? (item.roles?.includes(role) ?? false) : false))
+      items: section.items.filter(item => (role ? item.roles?.includes(role) : false)),
     }))
 
-  
   useEffect(() => {
     const findActiveSection = () => {
-      for (const section of nav) { // use filtered nav
+      for (const section of nav) {
         if (section.path && pathname === section.path) {
           setActivePage(section.id)
           return
         }
-
         for (const item of section.items) {
           if (item.path && pathname === item.path) {
             setActivePage(item.id)
@@ -55,12 +46,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggleSidebar }) => {
         }
       }
     }
-
     findActiveSection()
   }, [pathname, nav, expandedSections])
 
   const toggleMenu = (sectionId: string) => {
-    const section = nav.find(nav => nav.id === sectionId) 
+    const section = nav.find(nav => nav.id === sectionId)
     if (!section) return
 
     if (!isOpen) {
@@ -80,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggleSidebar }) => {
       setExpandedSections(prev =>
         prev.includes(sectionId)
           ? prev.filter(id => id !== sectionId)
-          : [...prev, sectionId]
+          : [...prev, sectionId],
       )
     } else if (section.path) {
       setActivePage(sectionId)
@@ -97,50 +87,56 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggleSidebar }) => {
     }
   }
 
-  const handleLogout = () => {
-    console.log('Logging out...')
-    router.push('/login')
-  }
-
   return (
     <>
+      {/* Overlay for mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm md:hidden"
           onClick={onToggleSidebar}
         />
       )}
 
+      {/* Sidebar */}
       <aside
-        className={`fixed md:static top-0 left-0 z-50 h-full bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 flex flex-col shadow-xl md:shadow-none transform transition-all duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-20'}`}
-      >
+  className={`fixed md:static top-0 left-0 z-50 h-full flex flex-col text-sidebar-foreground border-r border-sidebar-border shadow-lg md:shadow-none transition-all duration-300 ease-in-out
+    bg-white
+    ${isOpen ? 'translate-x-0 w-56 sm:w-60' : '-translate-x-full md:translate-x-0 md:w-16 lg:w-20'}
+  `}
+>
+
         {/* Header */}
-        <div className="px-5 py-5 border-b border-gray-200 flex items-center justify-between bg-white">
+        <div className="px-3 py-5 border-b border-sidebar-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative">
               <Image
                 src={TeamflowLogo}
                 alt="TeamFlow AI Logo"
-                width={35}
-                height={35}
-                priority
-                className="rounded-lg"
+                width={28}
+                height={28}
+                className="rounded-md"
               />
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+              <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border border-sidebar" />
             </div>
-            <h1 className={`font-bold text-lg text-gray-900 transition-all duration-300 ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 md:hidden'}`}>
+            <h1
+              className={`font-semibold text-sm transition-all duration-300 ${
+                isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 md:hidden'
+              }`}
+            >
               Teamflow AI
             </h1>
           </div>
 
-          <button onClick={onToggleSidebar} className="md:hidden text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-1 rounded-md transition-colors">
-            <X className="w-5 h-5" />
+          <button
+            onClick={onToggleSidebar}
+            className="md:hidden text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent p-1 rounded transition-colors"
+          >
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Navigation */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto px-2 py-3 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
           <nav className="space-y-1">
             {nav.map(section => {
               const isExpanded = expandedSections.includes(section.id)
@@ -148,27 +144,45 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggleSidebar }) => {
               const hasActiveChild = section.items.some(item => item.id === activePage)
 
               return (
-                <div key={section.id} className="mb-1">
+                <div key={section.id}>
                   <button
                     onClick={() => toggleMenu(section.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group ${isActive || hasActiveChild ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}`}
+                    className={`w-full flex items-center justify-between px-2.5 py-2 text-xs font-medium rounded-md transition-all duration-200 group ${
+                      isActive || hasActiveChild
+                        ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <section.icon className={`w-5 h-5 transition-transform duration-200 ${isActive || hasActiveChild ? '' : 'group-hover:scale-110'}`} />
-                      {isOpen && <span className="transition-all duration-300">{section.label}</span>}
+                    <div className="flex items-center gap-2">
+                      <section.icon className="w-4 h-4" />
+                      {isOpen && <span className="truncate">{section.label}</span>}
                     </div>
-                    {isOpen && section.items.length > 0 && <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />}
+                    {isOpen && section.items.length > 0 && (
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                          isExpanded ? 'rotate-180' : ''
+                        }`}
+                      />
+                    )}
                   </button>
 
                   {/* Submenu */}
                   {section.items.length > 0 && isOpen && (
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
-                      <div className="ml-8 space-y-0.5 border-l-2 border-gray-200 pl-2">
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                        isExpanded ? 'max-h-72 opacity-100 mt-1' : 'max-h-0 opacity-0'
+                      }`}
+                    >
+                      <div className="ml-6 space-y-0.5 border-l border-sidebar-border pl-2">
                         {section.items.map(item => (
                           <button
                             key={item.id}
                             onClick={() => handleItemClick(item.id, item.path)}
-                            className={`w-full text-left px-3 py-2 text-sm rounded-md transition-all duration-200 ${activePage === item.id ? 'bg-blue-50 text-blue-700 font-semibold border-l-2 border-blue-600 -ml-0.5' : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600 hover:translate-x-1'}`}
+                            className={`w-full text-left px-2 py-1.5 text-xs rounded-md transition-all duration-200 ${
+                              activePage === item.id
+                                ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold border-l-2 border-sidebar-primary -ml-0.5'
+                                : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:translate-x-1'
+                            }`}
                           >
                             {item.label}
                           </button>
@@ -183,27 +197,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggleSidebar }) => {
         </div>
 
         {/* Bottom */}
-        <div className="border-t border-gray-200 bg-white p-3 space-y-1">
+        <div className="border-t border-sidebar-border bg-sidebar p-2 space-y-1">
           <button
-            onClick={() => { if (!isOpen) { onToggleSidebar() } else { router.push('/dashboard/settings') } }}
-            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 rounded-lg transition-all duration-200 group"
+            onClick={() =>
+              isOpen ? router.push('/dashboard/settings') : onToggleSidebar()
+            }
+            className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-all duration-200 group"
           >
-            <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+            <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
             {isOpen && <span>Settings</span>}
           </button>
           <button
-            onClick={() => { if (!isOpen) { onToggleSidebar() } else { router.push('/help') } }}
-            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600 rounded-lg transition-all duration-200 group"
+            onClick={() => (isOpen ? router.push('/help') : onToggleSidebar())}
+            className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md transition-all duration-200 group"
           >
-            <HelpCircle className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+            <HelpCircle className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
             {isOpen && <span>Help & Support</span>}
-          </button>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 group"
-          >
-            <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
-            {isOpen && <span>Logout</span>}
           </button>
         </div>
       </aside>

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Bell,
@@ -13,6 +13,8 @@ import {
   Settings,
   User,
   Users,
+  Moon,
+  Sun,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -40,31 +42,46 @@ const createAvatar = (fullName: string): string => {
 const NotificationsDropdown = () => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
-      <Button variant="ghost" size="icon" className="relative">
-        <Bell className="w-5 h-5" />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative text-foreground hover:bg-accent"
+      >
+        <Bell className="w-4 h-4" />
         <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="w-80 max-h-[400px] overflow-y-auto">
-      <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+    <DropdownMenuContent
+      align="end"
+      className="w-72 max-h-[360px] overflow-y-auto bg-card text-card-foreground border border-border shadow-md"
+    >
+      <DropdownMenuLabel className="text-sm font-semibold">
+        Notifications
+      </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem className="flex flex-col items-start py-3">
+
+      <DropdownMenuItem className="flex flex-col items-start py-2">
         <div className="font-medium">New task assigned</div>
-        <div className="text-sm text-gray-500">Design homepage mockup</div>
-        <div className="text-xs text-gray-400 mt-1">2 hours ago</div>
+        <div className="text-xs text-muted-foreground">
+          Design homepage mockup
+        </div>
+        <div className="text-[10px] text-muted-foreground mt-1">2 hours ago</div>
       </DropdownMenuItem>
-      <DropdownMenuItem className="flex flex-col items-start py-3">
+
+      <DropdownMenuItem className="flex flex-col items-start py-2">
         <div className="font-medium">Project deadline approaching</div>
-        <div className="text-sm text-gray-500">Marketing Campaign due in 2 days</div>
-        <div className="text-xs text-gray-400 mt-1">5 hours ago</div>
+        <div className="text-xs text-muted-foreground">Campaign due in 2 days</div>
+        <div className="text-[10px] text-muted-foreground mt-1">5 hours ago</div>
       </DropdownMenuItem>
-      <DropdownMenuItem className="flex flex-col items-start py-3">
+
+      <DropdownMenuItem className="flex flex-col items-start py-2">
         <div className="font-medium">Team member joined</div>
-        <div className="text-sm text-gray-500">Sarah Johnson joined Mobile App Launch</div>
-        <div className="text-xs text-gray-400 mt-1">1 day ago</div>
+        <div className="text-xs text-muted-foreground">Sarah Johnson joined</div>
+        <div className="text-[10px] text-muted-foreground mt-1">1 day ago</div>
       </DropdownMenuItem>
+
       <DropdownMenuSeparator />
-      <DropdownMenuItem className="justify-center text-blue-600 cursor-pointer">
+      <DropdownMenuItem className="justify-center text-primary cursor-pointer text-xs">
         View all notifications
       </DropdownMenuItem>
     </DropdownMenuContent>
@@ -77,24 +94,30 @@ const ProfileDropdown = ({ user }: { user: any }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center gap-2 px-2 sm:px-3">
-          <Avatar className="w-8 h-8">
-            <AvatarFallback className="bg-blue-600 text-white">
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 px-2 sm:px-2.5 text-foreground hover:bg-accent"
+        >
+          <Avatar className="w-7 h-7">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
               {createAvatar(user.name)}
             </AvatarFallback>
           </Avatar>
           <div className="hidden md:block text-left">
-            <div className="text-sm font-medium">{user.name}</div>
-            <div className="text-xs text-gray-500">{user.role}</div>
+            <div className="text-sm font-medium leading-none">{user.name}</div>
+            <div className="text-[11px] text-muted-foreground">{user.role}</div>
           </div>
-          <ChevronDown className="w-4 h-4 hidden md:block" />
+          <ChevronDown className="w-3.5 h-3.5 hidden md:block" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent
+        align="end"
+        className="w-56 bg-card text-card-foreground border border-border shadow-md"
+      >
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium">{user.name}</p>
-            <p className="text-xs text-gray-500">{user.email}</p>
+            <p className="text-xs text-muted-foreground">{user.email}</p>
             <Badge variant="outline" className="w-fit mt-1 capitalize">
               {user.role}
             </Badge>
@@ -102,44 +125,59 @@ const ProfileDropdown = ({ user }: { user: any }) => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-          <User className="w-4 h-4 mr-2" />
-          My Profile
+          <User className="w-4 h-4 mr-2" /> My Profile
         </DropdownMenuItem>
         <DropdownMenuItem>
-          <Settings className="w-4 h-4 mr-2" />
-          Settings
+          <Settings className="w-4 h-4 mr-2" /> Settings
         </DropdownMenuItem>
         <DropdownMenuItem>
-          <HelpCircle className="w-4 h-4 mr-2" />
-          Help & Support
+          <HelpCircle className="w-4 h-4 mr-2" /> Help & Support
         </DropdownMenuItem>
-        
+
         {isManager && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Manager Dashboard
+              <BarChart3 className="w-4 h-4 mr-2" /> Manager Dashboard
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Users className="w-4 h-4 mr-2" />
-              Team Management
+              <Users className="w-4 h-4 mr-2" /> Team Management
             </DropdownMenuItem>
           </>
         )}
-        
+
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-red-600">
-          <LogOut className="w-4 h-4 mr-2" />
-          Logout
+        <DropdownMenuItem className="text-destructive">
+          <LogOut className="w-4 h-4 mr-2" /> Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 };
 
-export const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onToggleSidebar }) => {
+export const Header: React.FC<HeaderProps> = ({
+  isSidebarOpen,
+  onToggleSidebar,
+}) => {
   const { user } = useAuthStore();
+  const [isDark, setIsDark] = useState(false);
+
+  // Load theme from localStorage
+  // useEffect(() => {
+  //   const theme = localStorage.getItem("theme");
+  //   if (theme === "dark") {
+  //     document.documentElement.classList.add("dark");
+  //     setIsDark(true);
+  //   }
+  // }, []);
+
+  // Toggle dark mode
+  const toggleTheme = () => {
+    // const newTheme = isDark ? "light" : "dark";
+    // setIsDark(!isDark);
+    // document.documentElement.classList.toggle("dark", !isDark);
+    // localStorage.setItem("theme", newTheme);
+  };
 
   if (!user) return null;
 
@@ -149,30 +187,61 @@ export const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onToggleSidebar }
     : `Welcome back, ${user.name}! Here are your tasks today.`;
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 md:px-6 py-3 md:py-4">
+  <header className="sticky top-0 z-50 border-b border-border px-3 md:px-5 py-2.5 md:py-4 text-foreground bg-white shadow-sm">
       <div className="flex items-center justify-between">
-        {/* LEFT SIDE */}
-        <div className="flex items-center gap-3 md:gap-4">
-          <Button variant="ghost" size="icon" onClick={onToggleSidebar}>
-            {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        {/* LEFT */}
+        <div className="flex items-center gap-2 md:gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleSidebar}
+            className="text-foreground hover:bg-accent"
+          >
+            {isSidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </Button>
+
           <div className="flex flex-col">
-            <h2 className="text-lg md:text-2xl font-bold text-gray-900">Dashboard</h2>
-            <p className="hidden sm:block text-sm text-gray-500">{welcomeMessage}</p>
+            <h2 className="text-base md:text-lg font-semibold leading-tight">
+              Dashboard
+            </h2>
+            <p className="hidden sm:block text-xs text-muted-foreground">
+              {welcomeMessage}
+            </p>
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* RIGHT */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Dark mode toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="text-foreground hover:bg-accent"
+            aria-label="Toggle dark mode"
+          >
+            <Sun className="w-4 h-4 dark:hidden" />
+            <Moon className="w-4 h-4 hidden dark:block" />
+          </Button>
+
           <NotificationsDropdown />
           <ProfileDropdown user={user} />
-          
+
           {isManager && (
-            <div className="hidden sm:flex gap-2">
-              <Button variant="outline" size="sm">
+            <div className="hidden sm:flex gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-7 px-2"
+              >
                 Export
               </Button>
-              <Button size="sm">New Project</Button>
+              <Button
+                size="sm"
+                className="text-xs h-7 px-3 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                New Project
+              </Button>
             </div>
           )}
         </div>
